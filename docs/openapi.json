@@ -1,0 +1,778 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Herbarium API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/api/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "plant",
+      "description": "Everything about the plants."
+    },
+    {
+      "name": "sensors",
+      "description": "Every endpoint linked to the sensors."
+    },
+    {
+      "name": "actuators",
+      "description": "Every endpoint linked to the actuators."
+    },
+    {
+      "name": "greenhouse",
+      "description": "Everything about the greenhouses."
+    }
+  ],
+  "paths": {
+    "/greenhouses": {
+      "get": {
+        "tags": [
+          "greenhouse"
+        ],
+        "summary": "Retrieve every greenhouses linked to the connected user",
+        "operationId": "getGreenhousesOfUser",
+        "security": [
+          {
+            "oauth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Greenhouse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "something went wrong",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "the user isn't authentified"
+          }
+        }
+      }
+    },
+    "/greenhouse/register": {
+      "put": {
+        "tags": [
+          "greenhouse"
+        ],
+        "summary": "Register a new greenhouse",
+        "operationId": "putGreenHouse",
+        "security": [
+          {
+            "oauth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "greenhouse_uuid": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "greenhouse_name": {
+                    "type": "string",
+                    "example": "Greenhouse A"
+                  }
+                },
+                "required": [
+                  "greenhouse_uuid",
+                  "greenhouse_name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "400": {
+            "description": "something went wrong",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "the user isn't authentified"
+          }
+        }
+      }
+    },
+    "/greenhouse/{uuid}": {
+      "get": {
+        "tags": [
+          "greenhouse"
+        ],
+        "summary": "Retrieve the greenhouse details",
+        "operationId": "getGreenhouse",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "description": "Uuid of the greenhouse to delete",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Greenhouse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "something went wrong",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "greenhouse"
+        ],
+        "summary": "Delete the specified greenhouse",
+        "operationId": "deleteGreenhouse",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "description": "Uuid of the greenhouse to delete",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "oauth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "403": {
+            "description": "user isn't logged in or doesn't have the right to delete a greenhouse"
+          },
+          "404": {
+            "description": "User has the right to delete the greenhouse but there isn't a greenhouse with this UUID linked to the user."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "greenhouse"
+        ],
+        "summary": "Update the basic information of the greenhouse.",
+        "operationId": "postGreenhouse",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "description": "Uuid of the greenhouse to update",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "oauth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GreenhouseDetails"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "403": {
+            "description": "user isn't logged in or doesn't have the right to update a greenhouse"
+          },
+          "404": {
+            "description": "User has the right to update the greenhouse but there isn't a greenhouse with this UUID linked to the user."
+          }
+        }
+      }
+    },
+    "/greenhouse/{uuid}/logs": {
+      "put": {
+        "tags": [
+          "greenhouse",
+          "plant",
+          "sensors",
+          "actuators"
+        ],
+        "summary": "Log the reading of one or multiple sensors and actuators",
+        "operationId": "putData",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "description": "Uuid of the greenhouse",
+            "schema": {
+              "$ref": "#/components/schemas/Uuid"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sensors": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/SensorData"
+                    }
+                  },
+                  "actuators": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ActuatorState"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation, the data is registered"
+          },
+          "404": {
+            "description": "operation failed, either the greenhouse or the plant doesn't exists"
+          }
+        }
+      }
+    },
+    "/greenhouse/{uuid}/actuators": {
+      "post": {
+        "tags": [
+          "greenhouse",
+          "plant",
+          "actuators"
+        ],
+        "summary": "Order a change of state for an actuator",
+        "operationId": "postActuatorState",
+        "security": [
+          {
+            "oauth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "description": "Uuid of the greenhouse",
+            "schema": {
+              "$ref": "#/components/schemas/Uuid"
+            },
+            "required": true
+          },
+          {
+            "name": "plant_uuid",
+            "in": "query",
+            "description": "Uuid of the plant linked to the actuator",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActuatorState"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation, the change of state is registered"
+          },
+          "404": {
+            "description": "operation failed, either the greenhouse or the plant doesn't exists"
+          }
+        }
+      }
+    },
+    "/greenhouse/{uuid}/plant/{position}": {
+      "put": {
+        "tags": [
+          "plant"
+        ],
+        "summary": "Notify the API a when plant have been added to a greenhouse",
+        "operationId": "putPlant",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "description": "Uuid of the greenhouse",
+            "schema": {
+              "$ref": "#/components/schemas/Uuid"
+            },
+            "required": true
+          },
+          {
+            "name": "position",
+            "in": "path",
+            "description": "Position of the plant into the greenhouse",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation. Return the uuid of the plant. When the user confirm the position and the type of the plant, the service will call the greenhouse to specify the plant information.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "uuid": {
+                      "$ref": "#/components/schemas/Uuid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "operation failed, because the position passed is invalid."
+          },
+          "404": {
+            "description": "operation failed, either the greenhouse or the plant doesn't exists"
+          }
+        }
+      }
+    },
+    "/greenhouse/plant/{plant_uuid}": {
+      "post": {
+        "tags": [
+          "plant"
+        ],
+        "summary": "Update the details of a plant",
+        "operationId": "postUpdatePlant",
+        "security": [
+          {
+            "oauth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plant_uuid",
+            "in": "path",
+            "description": "Uuid of the plant",
+            "schema": {
+              "$ref": "#/components/schemas/Uuid"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlantUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "uuid": {
+                      "$ref": "#/components/schemas/Uuid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "operation failed, the body received isn't correct."
+          },
+          "404": {
+            "description": "operation failed, either the greenhouse or the plant doesn't exists"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "plant"
+        ],
+        "summary": "Notify the API when a plant have been removed",
+        "operationId": "deletePlant",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plant_uuid",
+            "in": "path",
+            "description": "Uuid of the plant",
+            "schema": {
+              "$ref": "#/components/schemas/Uuid"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "uuid": {
+                      "$ref": "#/components/schemas/Uuid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "operation failed, either the greenhouse or the plant doesn't exists"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "description": "API Key used by the greenhouses to communicate with the API.",
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      },
+      "oauth": {
+        "description": "ID Token provided by Firebase when a user is connected.",
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+            "scopes": {
+              "read": "profile"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Uuid": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Universal unique identifier"
+      },
+      "GreenhouseDetails": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name given to the greenhouse by the user"
+          }
+        },
+        "required": [
+          "uuid",
+          "name"
+        ]
+      },
+      "Greenhouse": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name given to the greenhouse by the user"
+          },
+          "plants": {
+            "description": "Every plant actived in the greenhouse",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Plant"
+            }
+          },
+          "tank_level": {
+            "$ref": "#/components/schemas/SensorData"
+          },
+          "last_timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date time when the last data from this greenhouse was received."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the greenhouse was registered."
+          }
+        },
+        "required": [
+          "uuid",
+          "name",
+          "plants",
+          "tank_level",
+          "last_timestamp",
+          "created_at"
+        ]
+      },
+      "PlantUpdateRequest": {
+        "description": "Body send to the API to update a plant details",
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/PlantType"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Plant": {
+        "description": "Representation of a plant in a greenhouse.",
+        "type": "object",
+        "properties": {
+          "last_uuid": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "uuid": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "On which tile of the greenhouse the plant is."
+          },
+          "type": {
+            "$ref": "#/components/schemas/PlantType"
+          },
+          "planted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the plant was planted."
+          },
+          "moisture_last_reading": {
+            "$ref": "#/components/schemas/SensorData"
+          },
+          "light_last_reading": {
+            "$ref": "#/components/schemas/SensorData"
+          },
+          "valve_status": {
+            "$ref": "#/components/schemas/ActuatorState"
+          },
+          "light_strip_status": {
+            "$ref": "#/components/schemas/ActuatorState"
+          }
+        },
+        "required": [
+          "uuid",
+          "position",
+          "type",
+          "planted_at",
+          "moisture_last_reading",
+          "light_last_reading"
+        ]
+      },
+      "PlantType": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique identifier of the type."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the plant.",
+            "example": "Tomato"
+          },
+          "moisture_goal": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Percentage of moisture needed for the plant to perfectly grow.",
+            "example": 80,
+            "default": 80
+          },
+          "light_exposure_min_duration": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 24,
+            "description": "Number of hour needed for the plant to perfectly grow.",
+            "example": 14,
+            "default": 14
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "moisture_goal",
+          "light_exposure_min_duration"
+        ]
+      },
+      "SensorData": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "M",
+              "L",
+              "T"
+            ],
+            "description": "Which type of sensor the data come from. M => Moisture sensor, L => Light sensor, T => Tank level sensor",
+            "example": "M"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the data was read"
+          },
+          "value": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Value read by the sensor"
+          },
+          "plant_uuid": {
+            "$ref": "#/components/schemas/Uuid"
+          }
+        },
+        "required": [
+          "type",
+          "timestamp",
+          "value"
+        ]
+      },
+      "ActuatorState": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "V",
+              "L",
+              "P"
+            ],
+            "description": "Which type of actuator the data come from. L => Light strip section, V => Valve, P => Pump.",
+            "example": "V"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the state was changed"
+          },
+          "value": {
+            "type": "boolean",
+            "description": "State of the actuator."
+          },
+          "plant_uuid": {
+            "$ref": "#/components/schemas/Uuid"
+          }
+        },
+        "required": [
+          "type",
+          "timestamp",
+          "value"
+        ]
+      },
+      "ApiErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "MOVIE_NOT_AVAILABLE",
+              "USER_CANT_RENT"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
