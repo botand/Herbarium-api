@@ -1,7 +1,9 @@
 package dev.xavierc.herbarium.api
 
 // Use this file to hold package-level internal functions that return receiver object passed to the `install` method.
+import com.typesafe.config.ConfigFactory
 import io.ktor.auth.*
+import io.ktor.config.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.util.*
@@ -16,8 +18,13 @@ import java.util.concurrent.TimeUnit
  *
  * See http://ktor.io/features/cors.html
  */
-internal fun ApplicationCORSConfiguration(): CORS.Configuration.() -> Unit {
+internal fun applicationCORSConfiguration(): CORS.Configuration.() -> Unit {
     return {
+        method(HttpMethod.Put)
+        method(HttpMethod.Post)
+        method(HttpMethod.Get)
+        method(HttpMethod.Delete)
+        allowCredentials = true
         // method(HttpMethod.Options)
         // header(HttpHeaders.XForwardedProto)
         // anyHost()
@@ -30,6 +37,12 @@ internal fun ApplicationCORSConfiguration(): CORS.Configuration.() -> Unit {
     }
 }
 
+internal fun applicationDatabaseConfiguration(): ApplicationConfig {
+    val appConfig = HoconApplicationConfig(ConfigFactory.load())
+
+    return appConfig.config("database")
+}
+
 /**
  * Application block for [HSTS] configuration.
  *
@@ -38,7 +51,7 @@ internal fun ApplicationCORSConfiguration(): CORS.Configuration.() -> Unit {
  *
  * See http://ktor.io/features/hsts.html
  */
-internal fun ApplicationHstsConfiguration(): HSTS.Configuration.() -> Unit {
+internal fun applicationHstsConfiguration(): HSTS.Configuration.() -> Unit {
     return {
         maxAgeInSeconds = TimeUnit.DAYS.toSeconds(365)
         includeSubDomains = true
@@ -57,7 +70,7 @@ internal fun ApplicationHstsConfiguration(): HSTS.Configuration.() -> Unit {
  *
  * See http://ktor.io/features/compression.html
  */
-internal fun ApplicationCompressionConfiguration(): Compression.Configuration.() -> Unit {
+internal fun applicationCompressionConfiguration(): Compression.Configuration.() -> Unit {
     return {
         gzip {
             priority = 1.0

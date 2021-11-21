@@ -20,6 +20,7 @@ import dev.xavierc.herbarium.api.apis.ActuatorsApi
 import dev.xavierc.herbarium.api.apis.GreenhouseApi
 import dev.xavierc.herbarium.api.apis.PlantApi
 import dev.xavierc.herbarium.api.apis.SensorsApi
+import dev.xavierc.herbarium.api.repository.DatabaseFactory
 
 
 internal val settings = HoconApplicationConfig(ConfigFactory.defaultApplication(HTTP::class.java.classLoader))
@@ -44,9 +45,9 @@ fun Application.main() {
         register(ContentType.Application.Json, GsonConverter())
     }
     install(AutoHeadResponse) // see https://ktor.io/docs/autoheadresponse.html
-    install(Compression, ApplicationCompressionConfiguration()) // see https://ktor.io/docs/compression.html
-    install(CORS, ApplicationCORSConfiguration()) // see https://ktor.io/docs/cors.html
-    install(HSTS, ApplicationHstsConfiguration()) // see https://ktor.io/docs/hsts.html
+    install(Compression, applicationCompressionConfiguration()) // see https://ktor.io/docs/compression.html
+    install(CORS, applicationCORSConfiguration()) // see https://ktor.io/docs/cors.html
+    install(HSTS, applicationHstsConfiguration()) // see https://ktor.io/docs/hsts.html
     install(Locations) // see https://ktor.io/docs/features-locations.html
     install(Authentication) {
         // "Implement API key auth (apiKey) for parameter name 'X-API-Key'."
@@ -67,6 +68,9 @@ fun Application.main() {
             }
         }
     }
+
+    DatabaseFactory.init()
+
     install(Routing) {
         ActuatorsApi()
         GreenhouseApi()
