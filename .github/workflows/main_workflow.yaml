@@ -95,7 +95,9 @@ jobs:
   create-draft-release:
     name: Github release
     needs:
+      - validate_tag
       - build_docker_image
+    if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
       - name: Create draft release
