@@ -15,7 +15,7 @@ data class ApiKeyCredential(val value: String) : Credential
 data class ApiPrincipal(val apiKeyCredential: ApiKeyCredential?) : Principal
 
 /**
-* Represents a Api Key authentication provider
+* Represents an Api Key authentication provider
 * @param name is the name of the provider, or `null` for a default provider
 */
 class ApiKeyAuthenticationProvider(configuration: Configuration) : AuthenticationProvider(configuration) {

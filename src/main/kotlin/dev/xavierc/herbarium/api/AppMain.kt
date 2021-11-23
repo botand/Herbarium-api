@@ -21,6 +21,10 @@ import dev.xavierc.herbarium.api.apis.GreenhouseApi
 import dev.xavierc.herbarium.api.apis.PlantApi
 import dev.xavierc.herbarium.api.apis.SensorsApi
 import dev.xavierc.herbarium.api.repository.DatabaseFactory
+import dev.xavierc.herbarium.api.repository.PlantRepository
+import org.kodein.di.bind
+import org.kodein.di.ktor.di
+import org.kodein.di.singleton
 
 
 internal val settings = HoconApplicationConfig(ConfigFactory.defaultApplication(HTTP::class.java.classLoader))
@@ -53,8 +57,8 @@ fun Application.main() {
         // "Implement API key auth (apiKey) for parameter name 'X-API-Key'."
         apiKeyAuth("apiKey") {
             validate { apikeyCredential: ApiKeyCredential ->
-                when {
-                    apikeyCredential.value == "keyboardcat" -> ApiPrincipal(apikeyCredential)
+                when (apikeyCredential.value) {
+                    "keyboardcat" -> ApiPrincipal(apikeyCredential)
                     else -> null
                 }
             }
@@ -70,6 +74,10 @@ fun Application.main() {
     }
 
     DatabaseFactory.init()
+
+    di {
+        bind<PlantRepository>() with singleton { PlantRepository() }
+    }
 
     install(Routing) {
         ActuatorsApi()
