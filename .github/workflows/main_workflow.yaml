@@ -1,0 +1,106 @@
+name: Build and test the API
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '.gitignore'
+      - 'README.md'
+      - '.github/**'
+      - 'docs/**'
+  pull_request:
+    paths-ignore:
+      - '.gitignore'
+      - 'README.md'
+      - '.github/**'
+      - 'docs/**'
+env:
+  IMAGE_NAME: apomalyn/herbarium-api
+jobs:
+  validate_tag:
+    name: Validate the version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get version
+        id: version
+        run: |
+          echo "::set-output name=version::$(gradle properties -q | grep "version:" | awk '{print $2}')\n"
+      - name: Validate that version doesn't exists
+        uses: mukunku/tag-exists-action@v1.0.0
+        id: checkTag
+        with:
+          tag: ${{ steps.version.outputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - if: ${{ steps.checkTag.outputs.exists == 'true' && github.event_name == 'pull_request' }}
+        name: Post comment on PR
+        uses: thollander/actions-comment-pull-request@1.0.1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: '${{ steps.version.outputs.version }} already exists, please update the version in the config file.'
+      - if: ${{ steps.checkTag.outputs.exists == 'true' }}
+        name: Fails because the tag already exists.
+        run: exit 1
+  build_application:
+    name: Build the application
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+      - uses: actions/checkout@v2
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - uses: gradle/wrapper-validation-action@v1
+      - name: Build with Gradle
+        run: ./gradlew build
+  build_docker_image:
+    name: Build docker image
+    if: ${{ github.event_name == 'push' }}
+    needs:
+      - validate_tag
+      - build_application
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Docker
+        uses: docker-practice/actions-setup-docker@v1
+      - run: |
+          docker version
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      # Checkout the repository
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - uses: gradle/wrapper-validation-action@v1
+      - name: Build with Gradle
+        run: ./gradlew build
+      - name: Build docker image and push to docker hub
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:${{ needs.validate_tag.outputs.version }},${{ env.IMAGE_NAME }}:latest
+  create-draft-release:
+    name: Github release
+    needs:
+      - build_docker_image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create draft release
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: ${{ needs.validate_tag.outputs.version }}
+          title: ${{ needs.validate_tag.outputs.version }}
