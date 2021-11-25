@@ -792,10 +792,16 @@
           "healthy": {
             "type": "boolean",
             "default": true
+          },
+          "version": {
+            "type": "string",
+            "example": "1.0.0",
+            "description": "Version of the API"
           }
         },
         "required": [
-          "healthy"
+          "healthy",
+          "version"
         ]
       },
       "ApiErrorResponse": {
@@ -804,8 +810,7 @@
           "code": {
             "type": "string",
             "enum": [
-              "MOVIE_NOT_AVAILABLE",
-              "USER_CANT_RENT"
+              "ERROR"
             ]
           }
         }
