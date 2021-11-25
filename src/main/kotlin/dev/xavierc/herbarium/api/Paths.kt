@@ -23,7 +23,7 @@ object Paths {
      * @param plantUuid Uuid of the plant linked to the actuator
      * @param actuatorState  (optional)
      */
-    @Location("/greenhouse/{uuid}/actuators")
+    @Location("/api/greenhouse/{uuid}/actuators")
     class postActuatorState(
         val uuid: java.util.UUID,
         val plantUuid: java.util.UUID,
@@ -36,7 +36,7 @@ object Paths {
      * @param uuid Uuid of the greenhouse
      * @param inlineObject1  (optional)
      */
-    @Location("/greenhouse/{uuid}/logs")
+    @Location("/api/greenhouse/{uuid}/logs")
     class putData(val uuid: java.util.UUID, val inlineObject1: InlineObject1? = null)
 
     /**
@@ -44,7 +44,7 @@ object Paths {
      *
      * @param uuid Uuid of the greenhouse to delete
      */
-    @Location("/greenhouse/{uuid}")
+    @Location("/api/greenhouse/{uuid}")
     class deleteGreenhouse(val uuid: java.util.UUID)
 
     /**
@@ -52,14 +52,14 @@ object Paths {
      *
      * @param uuid Uuid of the greenhouse to delete
      */
-    @Location("/greenhouse/{uuid}")
+    @Location("/api/greenhouse/{uuid}")
     class getGreenhouse(val uuid: java.util.UUID)
 
     /**
      * Retrieve every greenhouses linked to the connected user
      *
      */
-    @Location("/greenhouses")
+    @Location("/api/greenhouses")
     object getGreenhousesOfUser
 
     /**
@@ -68,7 +68,7 @@ object Paths {
      * @param uuid Uuid of the greenhouse to update
      * @param greenhouseDetails  (optional)
      */
-    @Location("/greenhouse/{uuid}")
+    @Location("/api/greenhouse/{uuid}")
     class postGreenhouse(val uuid: java.util.UUID, val greenhouseDetails: GreenhouseDetails? = null)
 
     /**
@@ -76,7 +76,7 @@ object Paths {
      *
      * @param inlineObject  (optional)
      */
-    @Location("/greenhouse/register")
+    @Location("/api/greenhouse/register")
     class putGreenHouse(val inlineObject: InlineObject? = null)
 
     /**
@@ -84,7 +84,7 @@ object Paths {
      *
      * @param plantUuid Uuid of the plant
      */
-    @Location("/greenhouse/plant/{plantUuid}")
+    @Location("/api/greenhouse/plant/{plantUuid}")
     class deletePlant(val plantUuid: java.util.UUID)
 
     /**
@@ -93,7 +93,7 @@ object Paths {
      * @param plantUuid Uuid of the plant
      * @param plantUpdateRequest  (optional)
      */
-    @Location("/greenhouse/plant/{plantUuid}")
+    @Location("/api/greenhouse/plant/{plantUuid}")
     class postUpdatePlant(val plantUuid: java.util.UUID, val plantUpdateRequest: PlantUpdateRequest? = null)
 
     /**
@@ -102,7 +102,13 @@ object Paths {
      * @param uuid Uuid of the greenhouse
      * @param position Position of the plant into the greenhouse
      */
-    @Location("/greenhouse/{uuid}/plant/{position}")
+    @Location("/api/greenhouse/{uuid}/plant/{position}")
     class putPlant(val uuid: java.util.UUID, val position: kotlin.Int)
+
+    /**
+     * Always returns a 200.
+     */
+    @Location("/api/health")
+    class getHealth()
 
 }

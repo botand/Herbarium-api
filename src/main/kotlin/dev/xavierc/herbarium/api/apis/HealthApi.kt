@@ -23,16 +23,10 @@ import dev.xavierc.herbarium.api.infrastructure.ApiPrincipal
 import dev.xavierc.herbarium.api.models.InlineObject1
 
 @KtorExperimentalLocationsAPI
-fun Route.SensorsApi() {
+fun Route.HealthApi() {
     val gson = Gson()
-    val empty = mutableMapOf<String, Any?>()
 
-    authenticate("apiKey") {
-    put<Paths.putData> {
-        val principal = call.authentication.principal<ApiPrincipal>()!!
-        
-        call.respond(HttpStatusCode.NotImplemented)
+    get<Paths.getHealth> {
+        call.respond(HttpStatusCode.OK, gson.toJson(mapOf("healthy" to true)))
     }
-    }
-
 }
