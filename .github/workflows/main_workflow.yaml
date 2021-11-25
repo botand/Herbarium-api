@@ -57,6 +57,11 @@ jobs:
       - uses: gradle/wrapper-validation-action@v1
       - name: Build with Gradle
         run: ./gradlew check assemble
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: jar
+          path: ${{ github.workspace }}/build/libs/herbarium-api.jar
   build_docker_image:
     name: Build docker image
     needs:
@@ -81,18 +86,21 @@ jobs:
       # Checkout the repository
       - name: Checkout the repository
         uses: actions/checkout@v2
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      - uses: gradle/wrapper-validation-action@v1
-      - name: Build with Gradle
-        run: ./gradlew assemble
+      - name: Create build folder
+        run: |
+          mkdir build build/libs
+      - name: Download jar
+        uses: actions/download-artifact@v2
+        with:
+          name: JAR
+          path: ${{ github.workspace }}/build/libs
       - name: Build docker image and push to docker hub
         uses: docker/build-push-action@v2
         with:
           context: .
           push: ${{ github.event_name == 'push' }}
           tags: ${{ env.IMAGE_NAME }}:${{ needs.validate_tag.outputs.version }},${{ env.IMAGE_NAME }}:latest
-  create-draft-release:
+  create-release:
     name: Github release
     needs:
       - validate_tag
@@ -100,9 +108,20 @@ jobs:
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Create draft release
+      - name: Download JAR build
+        uses: actions/download-artifact@v2
+        with:
+          name: JAR
+          path: .
+      - name: Rename JAR
+        run: |
+          mv herbarium-api.jar herbarium-api-${{ needs.validate_tag.outputs.version }}.jar
+      - name: Create release
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           automatic_release_tag: ${{ needs.validate_tag.outputs.version }}
           title: ${{ needs.validate_tag.outputs.version }}
+          prerelease: false
+          files: |
+            herbarium-api-${{ needs.validate_tag.outputs.version }}.jar
