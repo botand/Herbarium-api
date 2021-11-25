@@ -60,7 +60,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v2
         with:
-          name: jar
+          name: JAR
           path: ${{ github.workspace }}/build/libs/herbarium-api.jar
   build_docker_image:
     name: Build docker image
