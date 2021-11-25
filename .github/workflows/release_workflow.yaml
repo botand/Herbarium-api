@@ -1,0 +1,37 @@
+name: Release the application to production
+on:
+  release:
+    types:
+      - released
+jobs:
+  deploy_to_heroku:
+    name: Deploy the API to Heroku
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+      - name: Create build folder
+        run: |
+          mkdir build build/libs
+      - name: Fetch jar from the release asset
+        uses: dsaltares/fetch-gh-release-asset@0.06
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          file: herbarium-api-${{ github.event.release.tag_name }}.jar
+          version: ${{ github.event.release.id }}
+          target: ${{ github.workspace }}/build/libs/herbarium-api.jar
+      - name: Deploy to Heroku
+        uses: AkhileshNS/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+          healthcheck: https://${{ secrets.HEROKU_APP_NAME }}.herokuapp.com/api/health
+          rollbackonhealthcheckfailed: true
+          usedocker: true
+          docker_heroku_process_type: web
+          docker_build_args: |
+            version
+          delay: 10 # Delay before the health check
+        env:
+          version: ${{ github.event.release.tag_name }}

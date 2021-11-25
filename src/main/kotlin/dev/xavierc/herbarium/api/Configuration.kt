@@ -37,10 +37,24 @@ internal fun applicationCORSConfiguration(): CORS.Configuration.() -> Unit {
     }
 }
 
+/**
+ * Application block for [Database] configuration
+ *
+ * Return the database section of the application.conf file
+ */
 internal fun applicationDatabaseConfiguration(): ApplicationConfig {
     val appConfig = HoconApplicationConfig(ConfigFactory.load())
 
     return appConfig.config("database")
+}
+
+/**
+ * Return the api section of the application.conf file
+ */
+internal fun applicationConfiguration(): ApplicationConfig {
+    val appConfig = HoconApplicationConfig(ConfigFactory.load())
+
+    return appConfig.config("api")
 }
 
 /**

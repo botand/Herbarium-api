@@ -11,15 +11,12 @@ import java.util.concurrent.TimeUnit
 import io.ktor.routing.*
 import io.ktor.util.*
 import com.typesafe.config.ConfigFactory
+import dev.xavierc.herbarium.api.apis.*
 import io.ktor.auth.*
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.config.HoconApplicationConfig
 import dev.xavierc.herbarium.api.infrastructure.*
-import dev.xavierc.herbarium.api.apis.ActuatorsApi
-import dev.xavierc.herbarium.api.apis.GreenhouseApi
-import dev.xavierc.herbarium.api.apis.PlantApi
-import dev.xavierc.herbarium.api.apis.SensorsApi
 import dev.xavierc.herbarium.api.repository.DatabaseFactory
 import dev.xavierc.herbarium.api.repository.PlantRepository
 import org.kodein.di.bind
@@ -83,7 +80,7 @@ fun Application.main() {
         ActuatorsApi()
         GreenhouseApi()
         PlantApi()
-        SensorsApi()
+        HealthApi()
     }
 
 }

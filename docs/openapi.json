@@ -25,6 +25,10 @@
     {
       "name": "greenhouse",
       "description": "Everything about the greenhouses."
+    },
+    {
+      "name": "health",
+      "description": "Everything about the health of this api."
     }
   ],
   "paths": {
@@ -518,6 +522,27 @@
           }
         }
       }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health of the API.",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Healthy"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -761,14 +786,31 @@
           "value"
         ]
       },
+      "Healthy": {
+        "type": "object",
+        "properties": {
+          "healthy": {
+            "type": "boolean",
+            "default": true
+          },
+          "version": {
+            "type": "string",
+            "example": "1.0.0",
+            "description": "Version of the API"
+          }
+        },
+        "required": [
+          "healthy",
+          "version"
+        ]
+      },
       "ApiErrorResponse": {
         "type": "object",
         "properties": {
           "code": {
             "type": "string",
             "enum": [
-              "MOVIE_NOT_AVAILABLE",
-              "USER_CANT_RENT"
+              "ERROR"
             ]
           }
         }

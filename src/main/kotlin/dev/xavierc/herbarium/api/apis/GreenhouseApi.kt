@@ -266,4 +266,11 @@ fun Route.GreenhouseApi() {
     }
     }
 
+    authenticate("apiKey") {
+        put<Paths.putData> {
+            val principal = call.authentication.principal<ApiPrincipal>()!!
+
+            call.respond(HttpStatusCode.NotImplemented)
+        }
+    }
 }
