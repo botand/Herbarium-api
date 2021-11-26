@@ -1,5 +1,6 @@
 package dev.xavierc.herbarium.api.repository
 
+import dev.xavierc.herbarium.api.repository.Greenhouses.nullable
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.Table
@@ -8,6 +9,7 @@ import java.util.*
 
 object Plant : Table("plants") {
     val uuid: Column<UUID> = uuid("uuid").autoGenerate().primaryKey()
+    val oldUuid: Column<UUID?> = uuid("old_uuid").nullable()
     val type: Column<Int> = integer("type") references PlantType.id
     val position: Column<Int> = integer("position")
     val overrideMoistureGoal: Column<Double?> = double("override_moisture_goal").nullable()

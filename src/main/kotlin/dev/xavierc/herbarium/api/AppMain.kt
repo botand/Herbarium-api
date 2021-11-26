@@ -22,6 +22,7 @@ import dev.xavierc.herbarium.api.repository.PlantRepository
 import org.kodein.di.bind
 import org.kodein.di.ktor.di
 import org.kodein.di.singleton
+import java.util.*
 
 
 internal val settings = HoconApplicationConfig(ConfigFactory.defaultApplication(HTTP::class.java.classLoader))
@@ -40,10 +41,24 @@ fun Application.main() {
             .convertRatesTo(TimeUnit.SECONDS)
             .convertDurationsTo(TimeUnit.MILLISECONDS)
             .build()
-        reporter.start(10, TimeUnit.SECONDS)
+//        reporter.start(10, TimeUnit.SECONDS)
     }
     install(ContentNegotiation) {
         register(ContentType.Application.Json, GsonConverter())
+    }
+    install(DataConversion) {
+        convert<UUID> {
+            decode { values, _ ->
+                values.singleOrNull()?.let { java.util.UUID.fromString(it) }
+            }
+            encode {
+                when (it) {
+                    null -> listOf()
+                    is UUID -> listOf(it.toString())
+                    else -> throw DataConversionException("Cannot convert to UUID")
+                }
+            }
+        }
     }
     install(AutoHeadResponse) // see https://ktor.io/docs/autoheadresponse.html
     install(Compression, applicationCompressionConfiguration()) // see https://ktor.io/docs/compression.html
