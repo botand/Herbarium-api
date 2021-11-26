@@ -53,7 +53,7 @@ object Paths {
      * @param uuid Uuid of the greenhouse to delete
      */
     @Location("/api/greenhouse/{uuid}")
-    class getGreenhouse(private val uuid: java.util.UUID)
+    class getGreenhouse(val uuid: java.util.UUID)
 
     /**
      * Retrieve every greenhouses linked to the connected user
