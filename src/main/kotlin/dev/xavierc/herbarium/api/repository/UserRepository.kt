@@ -21,6 +21,11 @@ object Users : Table("users") {
 }
 
 class UserRepository {
+    /**
+     * Retrieve the user corresponding to the [uuid]
+     * @param uuid of the user
+     * @throws NotFoundException if the user doesn't exist in the database
+     */
     fun getUser(uuid: UUID): User {
         lateinit var user: User
 
