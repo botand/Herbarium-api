@@ -84,7 +84,7 @@ object Paths {
      *
      * @param plantUuid Uuid of the plant
      */
-    @Location("/api/greenhouse/plant/{plantUuid}")
+    @Location("/api/plant/{plantUuid}")
     class deletePlant(val plantUuid: java.util.UUID)
 
     /**
@@ -93,7 +93,7 @@ object Paths {
      * @param plantUuid Uuid of the plant
      * @param plantUpdateRequest  (optional)
      */
-    @Location("/api/greenhouse/plant/{plantUuid}")
+    @Location("/api/plant/{plantUuid}")
     class postUpdatePlant(val plantUuid: java.util.UUID, val plantUpdateRequest: PlantUpdateRequest? = null)
 
     /**

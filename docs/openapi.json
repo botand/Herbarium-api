@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Herbarium API",
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
   "servers": [
     {
@@ -13,10 +13,6 @@
     {
       "name": "plant",
       "description": "Everything about the plants."
-    },
-    {
-      "name": "sensors",
-      "description": "Every endpoint linked to the sensors."
     },
     {
       "name": "actuators",
@@ -92,17 +88,12 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "greenhouse_uuid": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
                   "greenhouse_name": {
                     "type": "string",
                     "example": "Greenhouse A"
                   }
                 },
                 "required": [
-                  "greenhouse_uuid",
                   "greenhouse_name"
                 ]
               }
@@ -111,7 +102,19 @@
         },
         "responses": {
           "200": {
-            "description": "successful operation"
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "uuid": {
+                      "$ref": "#/components/schemas/Uuid"
+                    }
+                  }
+                }
+              }
+            }
           },
           "400": {
             "description": "something went wrong",
@@ -256,10 +259,7 @@
     "/greenhouse/{uuid}/logs": {
       "put": {
         "tags": [
-          "greenhouse",
-          "plant",
-          "sensors",
-          "actuators"
+          "greenhouse"
         ],
         "summary": "Log the reading of one or multiple sensors and actuators",
         "operationId": "putData",
@@ -312,11 +312,9 @@
         }
       }
     },
-    "/greenhouse/{uuid}/actuators": {
+    "/plant/{uuid}/actuators": {
       "post": {
         "tags": [
-          "greenhouse",
-          "plant",
           "actuators"
         ],
         "summary": "Order a change of state for an actuator",
@@ -330,15 +328,6 @@
           {
             "name": "uuid",
             "in": "path",
-            "description": "Uuid of the greenhouse",
-            "schema": {
-              "$ref": "#/components/schemas/Uuid"
-            },
-            "required": true
-          },
-          {
-            "name": "plant_uuid",
-            "in": "query",
             "description": "Uuid of the plant linked to the actuator",
             "required": true,
             "schema": {
@@ -423,7 +412,7 @@
         }
       }
     },
-    "/greenhouse/plant/{plant_uuid}": {
+    "/plant/{plant_uuid}": {
       "post": {
         "tags": [
           "plant"
