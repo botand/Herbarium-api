@@ -20,10 +20,6 @@ import dev.xavierc.herbarium.api.Paths
 import io.ktor.locations.*
 import io.ktor.routing.*
 import dev.xavierc.herbarium.api.infrastructure.ApiPrincipal
-import dev.xavierc.herbarium.api.models.ActuatorState
-import dev.xavierc.herbarium.api.models.InlineObject1
-import dev.xavierc.herbarium.api.models.InlineResponse200
-import dev.xavierc.herbarium.api.models.PlantUpdateRequest
 
 @KtorExperimentalLocationsAPI
 fun Route.PlantApi() {

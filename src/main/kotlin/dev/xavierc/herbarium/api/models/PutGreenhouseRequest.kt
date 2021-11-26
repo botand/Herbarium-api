@@ -13,12 +13,10 @@ package dev.xavierc.herbarium.api.models
 
 
 /**
- * 
- * @param greenhouseUuid 
+ *
  * @param greenhouseName 
  */
-data class InlineObject(
-    val greenhouseUuid: java.util.UUID,
-    val greenhouseName: kotlin.String
+data class PutGreenhouseRequest(
+    val greenhouseName: String
 ) 
 

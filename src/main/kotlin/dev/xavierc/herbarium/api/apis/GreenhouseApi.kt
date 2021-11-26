@@ -20,12 +20,6 @@ import dev.xavierc.herbarium.api.Paths
 import io.ktor.locations.*
 import io.ktor.routing.*
 import dev.xavierc.herbarium.api.infrastructure.ApiPrincipal
-import dev.xavierc.herbarium.api.models.ActuatorState
-import dev.xavierc.herbarium.api.models.ApiErrorResponse
-import dev.xavierc.herbarium.api.models.Greenhouse
-import dev.xavierc.herbarium.api.models.GreenhouseDetails
-import dev.xavierc.herbarium.api.models.InlineObject
-import dev.xavierc.herbarium.api.models.InlineObject1
 
 @KtorExperimentalLocationsAPI
 fun Route.GreenhouseApi() {

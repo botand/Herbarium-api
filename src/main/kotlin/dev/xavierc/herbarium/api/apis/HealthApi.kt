@@ -13,15 +13,12 @@ package dev.xavierc.herbarium.api.apis
 
 import com.google.gson.Gson
 import io.ktor.application.*
-import io.ktor.auth.*
 import io.ktor.http.*
 import io.ktor.response.*
 import dev.xavierc.herbarium.api.Paths
 import dev.xavierc.herbarium.api.applicationConfiguration
 import io.ktor.locations.*
 import io.ktor.routing.*
-import dev.xavierc.herbarium.api.infrastructure.ApiPrincipal
-import dev.xavierc.herbarium.api.models.InlineObject1
 
 @KtorExperimentalLocationsAPI
 fun Route.HealthApi() {

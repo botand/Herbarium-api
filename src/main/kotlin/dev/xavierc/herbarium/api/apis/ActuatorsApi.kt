@@ -19,9 +19,6 @@ import io.ktor.response.*
 import dev.xavierc.herbarium.api.Paths
 import io.ktor.locations.*
 import io.ktor.routing.*
-import dev.xavierc.herbarium.api.infrastructure.ApiPrincipal
-import dev.xavierc.herbarium.api.models.ActuatorState
-import dev.xavierc.herbarium.api.models.InlineObject1
 
 @KtorExperimentalLocationsAPI
 fun Route.ActuatorsApi() {

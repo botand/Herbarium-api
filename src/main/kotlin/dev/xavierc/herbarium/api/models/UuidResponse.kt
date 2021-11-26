@@ -11,16 +11,13 @@
 */
 package dev.xavierc.herbarium.api.models
 
-import dev.xavierc.herbarium.api.models.ActuatorState
-import dev.xavierc.herbarium.api.models.SensorData
 
 /**
  * 
- * @param sensors 
- * @param actuators 
+ * @param uuid Universal unique identifier
  */
-data class InlineObject1(
-    val sensors: kotlin.collections.List<SensorData>? = null,
-    val actuators: kotlin.collections.List<ActuatorState>? = null
+data class UuidResponse(
+    /* Universal unique identifier */
+    val uuid: java.util.UUID? = null
 ) 
 
