@@ -18,8 +18,10 @@ import io.ktor.client.engine.apache.Apache
 import io.ktor.config.HoconApplicationConfig
 import dev.xavierc.herbarium.api.infrastructure.*
 import dev.xavierc.herbarium.api.repository.*
+import dev.xavierc.herbarium.api.utils.DateTimeSerializer
+import org.joda.time.DateTime
+import org.kodein.di.DI
 import org.kodein.di.bind
-import org.kodein.di.ktor.di
 import org.kodein.di.singleton
 import java.util.*
 
@@ -43,12 +45,14 @@ fun Application.main() {
 //        reporter.start(10, TimeUnit.SECONDS)
     }
     install(ContentNegotiation) {
-        register(ContentType.Application.Json, GsonConverter())
+        gson {
+            registerTypeAdapter(DateTime::class.java, DateTimeSerializer())
+        }
     }
     install(DataConversion) {
         convert<UUID> {
             decode { values, _ ->
-                values.singleOrNull()?.let { java.util.UUID.fromString(it) }
+                values.singleOrNull()?.let { UUID.fromString(it) }
             }
             encode {
                 when (it) {
@@ -86,7 +90,7 @@ fun Application.main() {
 
     DatabaseFactory.init()
 
-    di {
+    val di = DI {
         bind<PlantRepository>() with singleton { PlantRepository() }
         bind<UserRepository>() with singleton { UserRepository() }
         bind<GreenhouseRepository>() with singleton { GreenhouseRepository() }
@@ -95,7 +99,7 @@ fun Application.main() {
 
     install(Routing) {
         ActuatorsApi()
-        GreenhouseApi()
+        GreenhouseApi(di)
         PlantApi()
         HealthApi()
     }
