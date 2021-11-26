@@ -17,8 +17,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.config.HoconApplicationConfig
 import dev.xavierc.herbarium.api.infrastructure.*
-import dev.xavierc.herbarium.api.repository.DatabaseFactory
-import dev.xavierc.herbarium.api.repository.PlantRepository
+import dev.xavierc.herbarium.api.repository.*
 import org.kodein.di.bind
 import org.kodein.di.ktor.di
 import org.kodein.di.singleton
@@ -89,6 +88,9 @@ fun Application.main() {
 
     di {
         bind<PlantRepository>() with singleton { PlantRepository() }
+        bind<UserRepository>() with singleton { UserRepository() }
+        bind<GreenhouseRepository>() with singleton { GreenhouseRepository() }
+        bind<DataRepository>() with singleton { DataRepository() }
     }
 
     install(Routing) {
