@@ -25,8 +25,8 @@ data class PlantType(
     /* Name of the plant. */
     val name: kotlin.String,
     /* Percentage of moisture needed for the plant to perfectly grow. */
-    val moistureGoal: java.math.BigDecimal,
+    val moistureGoal: Double,
     /* Number of hour needed for the plant to perfectly grow. */
-    val lightExposureMinDuration: java.math.BigDecimal
+    val lightExposureMinDuration: Double
 ) 
 

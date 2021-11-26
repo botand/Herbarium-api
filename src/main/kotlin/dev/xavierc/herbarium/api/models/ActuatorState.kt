@@ -11,21 +11,23 @@
 */
 package dev.xavierc.herbarium.api.models
 
+import org.joda.time.DateTime
+
 
 /**
  * 
  * @param type Which type of actuator the data come from. L => Light strip section, V => Valve, P => Pump.
  * @param timestamp When the state was changed
- * @param &#x60;value&#x60; State of the actuator.
+ * @param value State of the actuator.
  * @param plantUuid Universal unique identifier
  */
 data class ActuatorState(
     /* Which type of actuator the data come from. L => Light strip section, V => Valve, P => Pump. */
     val type: ActuatorState.Type,
     /* When the state was changed */
-    val timestamp: java.time.OffsetDateTime,
+    val timestamp: DateTime,
     /* State of the actuator. */
-    val `value`: kotlin.Boolean,
+    val value: kotlin.Boolean,
     /* Universal unique identifier */
     val plantUuid: java.util.UUID? = null
 ) 
@@ -35,9 +37,9 @@ data class ActuatorState(
     * Values: v,l,p
     */
     enum class Type(val value: kotlin.String){
-        v("V"),
-        l("L"),
-        p("P");
+        V("V"),
+        L("L"),
+        P("P");
     }
 }
 

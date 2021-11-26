@@ -11,9 +11,7 @@
 */
 package dev.xavierc.herbarium.api.models
 
-import dev.xavierc.herbarium.api.models.ActuatorState
-import dev.xavierc.herbarium.api.models.PlantType
-import dev.xavierc.herbarium.api.models.SensorData
+import org.joda.time.DateTime
 
 /**
  * Representation of a plant in a greenhouse.
@@ -34,7 +32,7 @@ data class Plant(
     val position: kotlin.Int,
     val type: PlantType,
     /* When the plant was planted. */
-    val plantedAt: java.time.OffsetDateTime,
+    val plantedAt: DateTime,
     val moistureLastReading: SensorData,
     val lightLastReading: SensorData,
     /* Universal unique identifier */

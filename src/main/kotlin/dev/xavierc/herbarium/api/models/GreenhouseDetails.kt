@@ -13,13 +13,10 @@ package dev.xavierc.herbarium.api.models
 
 
 /**
- * 
- * @param uuid Universal unique identifier
+ *
  * @param name Name given to the greenhouse by the user
  */
 data class GreenhouseDetails(
-    /* Universal unique identifier */
-    val uuid: java.util.UUID,
     /* Name given to the greenhouse by the user */
     val name: kotlin.String
 ) 
