@@ -11,6 +11,7 @@
 */
 package dev.xavierc.herbarium.api.models
 
+import com.google.gson.annotations.SerializedName
 import org.joda.time.DateTime
 
 
@@ -23,12 +24,13 @@ import org.joda.time.DateTime
  */
 data class SensorData(
     /* Which type of sensor the data come from. M => Moisture sensor, L => Light sensor, T => Tank level sensor */
-    val type: SensorData.Type,
+    val type: Type,
     /* When the data was read */
     val timestamp: DateTime,
     /* Value read by the sensor */
     val value: Double,
     /* Universal unique identifier */
+    @SerializedName("plant_uuid")
     val plantUuid: java.util.UUID? = null
 ) 
 {

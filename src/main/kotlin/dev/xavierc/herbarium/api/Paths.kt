@@ -37,7 +37,7 @@ object Paths {
      * @param putDataRequest
      */
     @Location("/api/greenhouse/{uuid}/logs")
-    class putData(private val uuid: java.util.UUID, private val putDataRequest: PutDataRequest)
+    class putData(val uuid: java.util.UUID)
 
     /**
      * Delete the specified greenhouse

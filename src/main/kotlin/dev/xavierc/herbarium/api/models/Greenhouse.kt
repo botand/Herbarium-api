@@ -11,6 +11,7 @@
 */
 package dev.xavierc.herbarium.api.models
 
+import com.google.gson.annotations.SerializedName
 import org.joda.time.DateTime
 
 /**
@@ -29,10 +30,14 @@ data class Greenhouse(
     val name: kotlin.String,
     /* Every plant active in the greenhouse */
     val plants: kotlin.collections.List<Plant>,
+    /*  Last tank level registered */
+    @SerializedName(value = "tank_level")
     val tankLevel: SensorData?,
     /* Date time when the last data from this greenhouse was received. */
+    @SerializedName(value = "last_timestamp")
     val lastTimestamp: DateTime?,
     /* When the greenhouse was registered. */
+    @SerializedName(value = "created_at")
     val createdAt: DateTime
 ) 
 

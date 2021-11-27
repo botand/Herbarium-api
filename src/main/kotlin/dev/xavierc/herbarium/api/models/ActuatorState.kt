@@ -11,6 +11,7 @@
 */
 package dev.xavierc.herbarium.api.models
 
+import com.google.gson.annotations.SerializedName
 import org.joda.time.DateTime
 
 
@@ -29,6 +30,7 @@ data class ActuatorState(
     /* State of the actuator. */
     val value: kotlin.Boolean,
     /* Universal unique identifier */
+    @SerializedName("plant_uuid")
     val plantUuid: java.util.UUID? = null
 ) 
 {
@@ -36,10 +38,10 @@ data class ActuatorState(
     * Which type of actuator the data come from. L => Light strip section, V => Valve, P => Pump.
     * Values: v,l,p
     */
-    enum class Type(val value: kotlin.String){
-        V("V"),
-        L("L"),
-        P("P");
+    enum class Type(val value: Char){
+        V('V'),
+        L('L'),
+        P('P');
     }
 }
 

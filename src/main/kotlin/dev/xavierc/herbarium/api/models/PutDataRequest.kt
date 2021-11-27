@@ -20,7 +20,7 @@ import dev.xavierc.herbarium.api.models.SensorData
  * @param actuators 
  */
 data class PutDataRequest(
-    val sensors: List<SensorData>? = null,
-    val actuators: List<ActuatorState>? = null
+    val sensors: List<SensorData>,
+    val actuators: List<ActuatorState>
 ) 
 

@@ -297,7 +297,11 @@
                       "$ref": "#/components/schemas/ActuatorState"
                     }
                   }
-                }
+                },
+                "required": [
+                  "sensors",
+                  "actuators"
+                ]
               }
             }
           }
@@ -307,7 +311,7 @@
             "description": "successful operation, the data is registered"
           },
           "404": {
-            "description": "operation failed, either the greenhouse or the plant doesn't exists"
+            "description": "operation failed, either the greenhouse or one of the plant doesn't exists"
           }
         }
       }

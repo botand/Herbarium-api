@@ -11,6 +11,7 @@
 */
 package dev.xavierc.herbarium.api.models
 
+import com.google.gson.annotations.SerializedName
 import org.joda.time.DateTime
 
 /**
@@ -32,12 +33,20 @@ data class Plant(
     val position: kotlin.Int,
     val type: PlantType,
     /* When the plant was planted. */
+    @SerializedName(value = "planted_at")
     val plantedAt: DateTime,
-    val moistureLastReading: SensorData,
-    val lightLastReading: SensorData,
+    @SerializedName(value = "moisture_last_reading")
+    val moistureLastReading: Double?,
+    @SerializedName(value = "light_last_reading")
+    val lightLastReading: Double?,
     /* Universal unique identifier */
+    @SerializedName(value = "last_uuid")
     val lastUuid: java.util.UUID? = null,
-    val valveStatus: ActuatorState? = null,
-    val lightStripStatus: ActuatorState? = null
+    @SerializedName(value = "valve_status")
+    val valveStatus: Boolean? = null,
+    @SerializedName(value = "light_strip_status")
+    val lightStripStatus: Boolean? = null,
+    /* Indicate if the plant was removed from the greenhouse */
+    val removed: Boolean = false
 ) 
 

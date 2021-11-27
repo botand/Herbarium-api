@@ -1,5 +1,6 @@
 package dev.xavierc.herbarium.api.models
 
+import com.google.gson.annotations.SerializedName
 import org.joda.time.DateTime
 import java.util.UUID
 
@@ -10,12 +11,16 @@ import java.util.UUID
  * @param displayName Name of the user
  * @param email email address of the user
  * @param language short language code (e.g: "fr") used by the user
- * @param joined_on when the user account was created
+ * @param joinedOn when the user account was created
  */
 data class User(
     val uuid: UUID,
+    @SerializedName(value = "display_name")
     val displayName: String,
     val email: String,
+    /* Short code of the language used by the user */
     val language: String,
-    val joined_on: DateTime
+    /* When the user created his account */
+    @SerializedName(value = "joined_on")
+    val joinedOn: DateTime
 )

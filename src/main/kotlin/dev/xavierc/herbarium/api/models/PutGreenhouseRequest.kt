@@ -11,12 +11,15 @@
 */
 package dev.xavierc.herbarium.api.models
 
+import com.google.gson.annotations.SerializedName
+
 
 /**
  *
  * @param greenhouseName 
  */
 data class PutGreenhouseRequest(
+    @SerializedName(value = "greenhouse_name")
     val greenhouseName: String
 ) 
 
