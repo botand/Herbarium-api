@@ -308,10 +308,29 @@
         },
         "responses": {
           "200": {
-            "description": "successful operation, the data is registered"
+            "description": "successful operation, the data is registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "unknown_plants": {
+                      "type": "array",
+                      "description": "All the plants that aren't known and so refused",
+                      "items": {
+                        "$ref": "#/components/schemas/Uuid"
+                      }
+                    }
+                  },
+                  "required": [
+                    "unknown_plants"
+                  ]
+                }
+              }
+            }
           },
           "404": {
-            "description": "operation failed, either the greenhouse or one of the plant doesn't exists"
+            "description": "operation failed, either the greenhouse doesn't exists"
           }
         }
       }

@@ -69,14 +69,6 @@ fun Route.PlantApi() {
     }
 
     authenticate("apiKey") {
-    put<Paths.putData> {
-        val principal = call.authentication.principal<ApiPrincipal>()!!
-        
-        call.respond(HttpStatusCode.NotImplemented)
-    }
-    }
-
-    authenticate("apiKey") {
     put<Paths.putPlant> {
         val principal = call.authentication.principal<ApiPrincipal>()!!
         

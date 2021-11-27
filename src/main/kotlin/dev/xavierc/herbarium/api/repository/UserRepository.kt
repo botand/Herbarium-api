@@ -13,7 +13,7 @@ import java.util.*
  * Table containing all the data read by the sensors
  */
 object Users : Table("users") {
-    val uuid: Column<UUID> = uuid("uuid").autoGenerate().primaryKey()
+    val uuid: Column<UUID> = uuid("uuid").primaryKey()
     val displayName: Column<String> = varchar("displayName", 256)
     val email: Column<String> = varchar("email", 512)
     val language: Column<String> = varchar("language", 2)

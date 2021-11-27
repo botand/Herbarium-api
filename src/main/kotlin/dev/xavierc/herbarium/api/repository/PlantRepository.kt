@@ -1,29 +1,103 @@
 package dev.xavierc.herbarium.api.repository
 
-import dev.xavierc.herbarium.api.repository.Greenhouses.nullable
-import org.jetbrains.exposed.sql.Column
-import org.jetbrains.exposed.sql.SqlExpressionBuilder
-import org.jetbrains.exposed.sql.Table
+import dev.xavierc.herbarium.api.models.Plant
+import dev.xavierc.herbarium.api.models.PlantType
+import dev.xavierc.herbarium.api.models.SensorData
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import java.util.*
 
-object Plant : Table("plants") {
+object Plants : Table("plants") {
     val uuid: Column<UUID> = uuid("uuid").autoGenerate().primaryKey()
     val oldUuid: Column<UUID?> = uuid("old_uuid").nullable()
-    val type: Column<Int> = integer("type") references PlantType.id
-    val position: Column<Int> = integer("position")
-    val overrideMoistureGoal: Column<Double?> = double("override_moisture_goal").nullable()
-    val overrideLightExposureMinDuration: Column<Double?> = double("override_light_exposure_min_duration").nullable()
+    val greenhouseUuid: Column<UUID> =
+        uuid("greenhouse_uuid").references(Greenhouses.uuid, onDelete = ReferenceOption.CASCADE)
+    val type: Column<Int> = integer("type").references(PlantTypes.id)
+    val position: Column<Int> = integer("position").check { it greaterEq 0 }
+    val overrideMoistureGoal: Column<Double?> = double("override_moisture_goal").check { it greaterEq 0 }.nullable()
+    val overrideLightExposureMinDuration: Column<Double?> =
+        double("override_light_exposure_min_duration").check { it greaterEq 0 }.nullable()
     val plantedAt: Column<DateTime> = datetime("planted_at")
+
+    /* Indicate if the plant was removed from the greenhouse */
+    val removed: Column<Boolean> = bool("removed").default(false)
 }
 
-object PlantType : Table("plant_types") {
+object PlantTypes : Table("plant_types") {
     val id: Column<Int> = integer("id").autoIncrement().primaryKey()
     val name: Column<String> = varchar("name", length = 512)
     val moistureGoal: Column<Double> = double("moisture_goal").default(80.0)
     val lightExposureMinDuration: Column<Double> = double("light_exposure_min_duration").default(14.0)
 }
 
-class PlantRepository {
+class PlantRepository(private val dataRepository: DataRepository) {
+    /**
+     * Check if the plant UUID is referenced in the database
+     */
+    fun exists(uuid: UUID): Boolean {
+        var count = 0
 
+        transaction {
+            count = Plants
+                .slice(Plants.uuid)
+                .select {
+                    Plants.uuid eq uuid
+                }.count()
+        }
+
+        return count == 1
+    }
+
+    /**
+     * Validate that each plant UUID exists in the database
+     * @param uuids all the UUID to validate
+     * @return list of the UUIDs that doesn't exist
+     */
+    fun exists(uuids: List<UUID>, greenhouseUuid: UUID? = null): List<UUID> {
+        val unknown = mutableListOf<UUID>()
+
+        transaction {
+            var query = Plants
+                .slice(Plants.uuid)
+                .select {
+                    Plants.uuid.inList(uuids)
+                }
+
+            if(greenhouseUuid != null) {
+                query = query.andWhere { Plants.greenhouseUuid.eq(greenhouseUuid) }
+            }
+
+            val exists = query.map { it[Plants.uuid] }
+
+            uuids.forEach {
+                if (!exists.contains(it)) {
+                    unknown.add(it)
+                }
+            }
+        }
+
+        return unknown
+    }
+}
+
+fun mapPlantTypes(row: ResultRow): PlantType {
+    return PlantType(
+        row[PlantTypes.id],
+        row[PlantTypes.name],
+        row[PlantTypes.moistureGoal],
+        row[PlantTypes.lightExposureMinDuration]
+    )
+}
+
+fun mapPlant(row: ResultRow, moistureLastReading: SensorData?, lightLastReading: SensorData?): Plant {
+    return Plant(
+        row[Plants.uuid],
+        row[Plants.position],
+        mapPlantTypes(row),
+        row[Plants.plantedAt],
+        moistureLastReading?.value,
+        lightLastReading?.value,
+        row[Plants.oldUuid],
+    )
 }

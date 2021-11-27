@@ -25,13 +25,12 @@ object DatabaseFactory {
 
         transaction {
             SchemaUtils.createMissingTablesAndColumns(
-                SensorDatas,
-                ActuactorsOrder,
-                PlantType,
-                Plant,
+                SensorsData,
+                ActuatorsState,
+                PlantTypes,
+                Plants,
                 Users,
-                Greenhouses,
-                GreenhousesPlants
+                Greenhouses
             )
         }
     }

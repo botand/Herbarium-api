@@ -4,7 +4,6 @@ import com.codahale.metrics.Slf4jReporter
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.gson.*
-import io.ktor.http.*
 import io.ktor.locations.*
 import io.ktor.metrics.dropwizard.*
 import java.util.concurrent.TimeUnit
@@ -91,10 +90,10 @@ fun Application.main() {
     DatabaseFactory.init()
 
     val di = DI {
-        bind<PlantRepository>() with singleton { PlantRepository() }
-        bind<UserRepository>() with singleton { UserRepository() }
-        bind<GreenhouseRepository>() with singleton { GreenhouseRepository() }
         bind<DataRepository>() with singleton { DataRepository() }
+        bind<PlantRepository>() with singleton { PlantRepository(DataRepository()) }
+        bind<GreenhouseRepository>() with singleton { GreenhouseRepository(DataRepository()) }
+        bind<UserRepository>() with singleton { UserRepository() }
     }
 
     install(Routing) {
