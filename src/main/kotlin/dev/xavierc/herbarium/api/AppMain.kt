@@ -107,5 +107,4 @@ fun Application.main() {
         PlantApi(di)
         HealthApi()
     }
-
 }
