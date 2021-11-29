@@ -181,6 +181,7 @@ fun Route.GreenhouseApi(di: DI) {
         // Check if greenhouse exists
         if (!greenhouseRepository.exist(request.uuid)) {
             call.respond(HttpStatusCode.NotFound)
+            return@put
         }
 
         val plantsUuid = mutableListOf<UUID>()
