@@ -11,13 +11,16 @@
 */
 package dev.xavierc.herbarium.api.models
 
+import dev.xavierc.herbarium.api.models.ActuatorState
+import dev.xavierc.herbarium.api.models.SensorData
 
 /**
  * 
- * @param uuid Universal unique identifier
+ * @param sensors 
+ * @param actuators 
  */
-data class InlineResponse200(
-    /* Universal unique identifier */
-    val uuid: java.util.UUID? = null
+data class PutDataRequest(
+    val sensors: List<SensorData>,
+    val actuators: List<ActuatorState>
 ) 
 

@@ -11,13 +11,17 @@
 */
 package dev.xavierc.herbarium.api.models
 
+import com.google.gson.annotations.SerializedName
+import org.joda.time.DateTime
 
 /**
- *
- * @param name Name given to the greenhouse by the user
+ * Body send to the API when a plant is planted
+ * @param position
+ * @param plantedAt
  */
-data class GreenhouseDetails(
-    /* Name given to the greenhouse by the user */
-    val name: kotlin.String
+data class PutPlantRequest(
+    val position: Int,
+    @SerializedName(value = "planted_at")
+    val plantedAt: DateTime
 ) 
 

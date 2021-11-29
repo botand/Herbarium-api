@@ -14,11 +14,10 @@ package dev.xavierc.herbarium.api.models
 
 /**
  * 
- * @param greenhouseUuid 
- * @param greenhouseName 
+ * @param uuid Universal unique identifier
  */
-data class InlineObject(
-    val greenhouseUuid: java.util.UUID,
-    val greenhouseName: kotlin.String
+data class UuidResponse(
+    /* Universal unique identifier */
+    val uuid: java.util.UUID
 ) 
 

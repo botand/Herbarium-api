@@ -11,16 +11,15 @@
 */
 package dev.xavierc.herbarium.api.models
 
-import dev.xavierc.herbarium.api.models.ActuatorState
-import dev.xavierc.herbarium.api.models.SensorData
+import com.google.gson.annotations.SerializedName
+
 
 /**
- * 
- * @param sensors 
- * @param actuators 
+ *
+ * @param greenhouseName 
  */
-data class InlineObject1(
-    val sensors: kotlin.collections.List<SensorData>? = null,
-    val actuators: kotlin.collections.List<ActuatorState>? = null
+data class PutGreenhouseRequest(
+    @SerializedName(value = "greenhouse_name")
+    val greenhouseName: String
 ) 
 

@@ -11,9 +11,8 @@
 */
 package dev.xavierc.herbarium.api.models
 
-import dev.xavierc.herbarium.api.models.ActuatorState
-import dev.xavierc.herbarium.api.models.PlantType
-import dev.xavierc.herbarium.api.models.SensorData
+import com.google.gson.annotations.SerializedName
+import org.joda.time.DateTime
 
 /**
  * Representation of a plant in a greenhouse.
@@ -34,12 +33,20 @@ data class Plant(
     val position: kotlin.Int,
     val type: PlantType,
     /* When the plant was planted. */
-    val plantedAt: java.time.OffsetDateTime,
-    val moistureLastReading: SensorData,
-    val lightLastReading: SensorData,
+    @SerializedName(value = "planted_at")
+    val plantedAt: DateTime,
+    @SerializedName(value = "moisture_last_reading")
+    val moistureLastReading: Double?,
+    @SerializedName(value = "light_last_reading")
+    val lightLastReading: Double?,
     /* Universal unique identifier */
+    @SerializedName(value = "last_uuid")
     val lastUuid: java.util.UUID? = null,
-    val valveStatus: ActuatorState? = null,
-    val lightStripStatus: ActuatorState? = null
+    @SerializedName(value = "valve_status")
+    val valveStatus: Boolean? = null,
+    @SerializedName(value = "light_strip_status")
+    val lightStripStatus: Boolean? = null,
+    /* Indicate if the plant was removed from the greenhouse */
+    val removed: Boolean = false
 ) 
 

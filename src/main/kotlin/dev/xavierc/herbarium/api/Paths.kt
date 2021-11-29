@@ -21,23 +21,23 @@ object Paths {
      *
      * @param uuid Uuid of the greenhouse
      * @param plantUuid Uuid of the plant linked to the actuator
-     * @param actuatorState  (optional)
+     * @param actuatorState
      */
     @Location("/api/greenhouse/{uuid}/actuators")
     class postActuatorState(
-        val uuid: java.util.UUID,
-        val plantUuid: java.util.UUID,
-        val actuatorState: ActuatorState? = null
+        private val uuid: java.util.UUID,
+        private val plantUuid: java.util.UUID,
+        private val actuatorState: ActuatorState
     )
 
     /**
      * Log the reading of one or multiple sensors and actuators
      *
      * @param uuid Uuid of the greenhouse
-     * @param inlineObject1  (optional)
+     * @param putDataRequest
      */
     @Location("/api/greenhouse/{uuid}/logs")
-    class putData(val uuid: java.util.UUID, val inlineObject1: InlineObject1? = null)
+    class putData(val uuid: java.util.UUID)
 
     /**
      * Delete the specified greenhouse
@@ -45,7 +45,7 @@ object Paths {
      * @param uuid Uuid of the greenhouse to delete
      */
     @Location("/api/greenhouse/{uuid}")
-    class deleteGreenhouse(val uuid: java.util.UUID)
+    class deleteGreenhouse(private val uuid: java.util.UUID)
 
     /**
      * Retrieve the greenhouse details
@@ -66,25 +66,25 @@ object Paths {
      * Update the basic information of the greenhouse.
      *
      * @param uuid Uuid of the greenhouse to update
-     * @param greenhouseDetails  (optional)
+     * @param greenhouseDetails
      */
     @Location("/api/greenhouse/{uuid}")
-    class postGreenhouse(val uuid: java.util.UUID, val greenhouseDetails: GreenhouseDetails? = null)
+    class postGreenhouse(private val uuid: java.util.UUID, private val greenhouseDetails: GreenhouseDetails)
 
     /**
      * Register a new greenhouse
      *
-     * @param inlineObject  (optional)
+     * @param putGreenhouseRequest
      */
     @Location("/api/greenhouse/register")
-    class putGreenHouse(val inlineObject: InlineObject? = null)
+    class putGreenHouse(private val putGreenhouseRequest: PutGreenhouseRequest)
 
     /**
      * Notify the API when a plant have been removed
      *
      * @param plantUuid Uuid of the plant
      */
-    @Location("/api/greenhouse/plant/{plantUuid}")
+    @Location("/api/plant/{plantUuid}")
     class deletePlant(val plantUuid: java.util.UUID)
 
     /**
@@ -93,17 +93,16 @@ object Paths {
      * @param plantUuid Uuid of the plant
      * @param plantUpdateRequest  (optional)
      */
-    @Location("/api/greenhouse/plant/{plantUuid}")
-    class postUpdatePlant(val plantUuid: java.util.UUID, val plantUpdateRequest: PlantUpdateRequest? = null)
+    @Location("/api/plant/{plantUuid}")
+    class postUpdatePlant(private val plantUuid: java.util.UUID, private val plantUpdateRequest: PlantUpdateRequest? = null)
 
     /**
      * Notify the API a when plant have been added to a greenhouse
      *
      * @param uuid Uuid of the greenhouse
-     * @param position Position of the plant into the greenhouse
      */
-    @Location("/api/greenhouse/{uuid}/plant/{position}")
-    class putPlant(val uuid: java.util.UUID, val position: kotlin.Int)
+    @Location("/api/greenhouse/{uuid}/plant")
+    class putPlant(val uuid: java.util.UUID)
 
     /**
      * Always returns a 200.

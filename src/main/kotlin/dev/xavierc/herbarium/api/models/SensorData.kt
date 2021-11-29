@@ -11,22 +11,26 @@
 */
 package dev.xavierc.herbarium.api.models
 
+import com.google.gson.annotations.SerializedName
+import org.joda.time.DateTime
+
 
 /**
  * 
  * @param type Which type of sensor the data come from. M => Moisture sensor, L => Light sensor, T => Tank level sensor
  * @param timestamp When the data was read
- * @param &#x60;value&#x60; Value read by the sensor
+ * @param value Value read by the sensor
  * @param plantUuid Universal unique identifier
  */
 data class SensorData(
     /* Which type of sensor the data come from. M => Moisture sensor, L => Light sensor, T => Tank level sensor */
-    val type: SensorData.Type,
+    val type: Type,
     /* When the data was read */
-    val timestamp: java.time.OffsetDateTime,
+    val timestamp: DateTime,
     /* Value read by the sensor */
-    val `value`: java.math.BigDecimal,
+    val value: Double,
     /* Universal unique identifier */
+    @SerializedName("plant_uuid")
     val plantUuid: java.util.UUID? = null
 ) 
 {
@@ -34,10 +38,10 @@ data class SensorData(
     * Which type of sensor the data come from. M => Moisture sensor, L => Light sensor, T => Tank level sensor
     * Values: m,l,t
     */
-    enum class Type(val value: kotlin.String){
-        m("M"),
-        l("L"),
-        t("T");
+    enum class Type(val value: Char){
+        M('M'),
+        L('L'),
+        T('T');
     }
 }
 

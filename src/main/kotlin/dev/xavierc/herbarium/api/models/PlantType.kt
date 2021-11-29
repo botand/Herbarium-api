@@ -11,6 +11,8 @@
 */
 package dev.xavierc.herbarium.api.models
 
+import com.google.gson.annotations.SerializedName
+
 
 /**
  * 
@@ -25,8 +27,10 @@ data class PlantType(
     /* Name of the plant. */
     val name: kotlin.String,
     /* Percentage of moisture needed for the plant to perfectly grow. */
-    val moistureGoal: java.math.BigDecimal,
+    @SerializedName(value = "moisture_goal")
+    val moistureGoal: Double,
     /* Number of hour needed for the plant to perfectly grow. */
-    val lightExposureMinDuration: java.math.BigDecimal
+    @SerializedName(value = "light_exposure_min_duration")
+    val lightExposureMinDuration: Double
 ) 
 

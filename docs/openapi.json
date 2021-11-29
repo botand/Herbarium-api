@@ -15,10 +15,6 @@
       "description": "Everything about the plants."
     },
     {
-      "name": "sensors",
-      "description": "Every endpoint linked to the sensors."
-    },
-    {
       "name": "actuators",
       "description": "Every endpoint linked to the actuators."
     },
@@ -92,17 +88,12 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "greenhouse_uuid": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
                   "greenhouse_name": {
                     "type": "string",
                     "example": "Greenhouse A"
                   }
                 },
                 "required": [
-                  "greenhouse_uuid",
                   "greenhouse_name"
                 ]
               }
@@ -111,7 +102,19 @@
         },
         "responses": {
           "200": {
-            "description": "successful operation"
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "uuid": {
+                      "$ref": "#/components/schemas/Uuid"
+                    }
+                  }
+                }
+              }
+            }
           },
           "400": {
             "description": "something went wrong",
@@ -256,10 +259,7 @@
     "/greenhouse/{uuid}/logs": {
       "put": {
         "tags": [
-          "greenhouse",
-          "plant",
-          "sensors",
-          "actuators"
+          "greenhouse"
         ],
         "summary": "Log the reading of one or multiple sensors and actuators",
         "operationId": "putData",
@@ -297,26 +297,47 @@
                       "$ref": "#/components/schemas/ActuatorState"
                     }
                   }
-                }
+                },
+                "required": [
+                  "sensors",
+                  "actuators"
+                ]
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "successful operation, the data is registered"
+            "description": "successful operation, the data is registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "unknown_plants": {
+                      "type": "array",
+                      "description": "All the plants that aren't known and so refused",
+                      "items": {
+                        "$ref": "#/components/schemas/Uuid"
+                      }
+                    }
+                  },
+                  "required": [
+                    "unknown_plants"
+                  ]
+                }
+              }
+            }
           },
           "404": {
-            "description": "operation failed, either the greenhouse or the plant doesn't exists"
+            "description": "operation failed, either the greenhouse doesn't exists"
           }
         }
       }
     },
-    "/greenhouse/{uuid}/actuators": {
+    "/plant/{uuid}/actuators": {
       "post": {
         "tags": [
-          "greenhouse",
-          "plant",
           "actuators"
         ],
         "summary": "Order a change of state for an actuator",
@@ -330,15 +351,6 @@
           {
             "name": "uuid",
             "in": "path",
-            "description": "Uuid of the greenhouse",
-            "schema": {
-              "$ref": "#/components/schemas/Uuid"
-            },
-            "required": true
-          },
-          {
-            "name": "plant_uuid",
-            "in": "query",
             "description": "Uuid of the plant linked to the actuator",
             "required": true,
             "schema": {
@@ -365,7 +377,7 @@
         }
       }
     },
-    "/greenhouse/{uuid}/plant/{position}": {
+    "/greenhouse/{uuid}/plant": {
       "put": {
         "tags": [
           "plant"
@@ -386,20 +398,33 @@
               "$ref": "#/components/schemas/Uuid"
             },
             "required": true
-          },
-          {
-            "name": "position",
-            "in": "path",
-            "description": "Position of the plant into the greenhouse",
-            "schema": {
-              "type": "integer",
-              "minimum": 0
-            },
-            "required": true
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "planted_at": {
+                    "$ref": "#/components/schemas/Datetime"
+                  },
+                  "position": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Position of the plant into the greenhouse"
+                  }
+                },
+                "required": [
+                  "planted_at",
+                  "position"
+                ]
+              }
+            }
+          }
+        },
         "responses": {
-          "200": {
+          "201": {
             "description": "Successful operation. Return the uuid of the plant. When the user confirm the position and the type of the plant, the service will call the greenhouse to specify the plant information.",
             "content": {
               "application/json": {
@@ -423,7 +448,7 @@
         }
       }
     },
-    "/greenhouse/plant/{plant_uuid}": {
+    "/plant/{plant_uuid}": {
       "post": {
         "tags": [
           "plant"
@@ -502,7 +527,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "202": {
             "description": "Successful operation.",
             "content": {
               "application/json": {
@@ -571,6 +596,10 @@
         "type": "string",
         "format": "uuid",
         "description": "Universal unique identifier"
+      },
+      "Datetime": {
+        "type": "string",
+        "format": "date-time"
       },
       "GreenhouseDetails": {
         "type": "object",

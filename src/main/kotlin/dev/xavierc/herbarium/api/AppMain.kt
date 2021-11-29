@@ -4,7 +4,6 @@ import com.codahale.metrics.Slf4jReporter
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.gson.*
-import io.ktor.http.*
 import io.ktor.locations.*
 import io.ktor.metrics.dropwizard.*
 import java.util.concurrent.TimeUnit
@@ -17,11 +16,13 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.config.HoconApplicationConfig
 import dev.xavierc.herbarium.api.infrastructure.*
-import dev.xavierc.herbarium.api.repository.DatabaseFactory
-import dev.xavierc.herbarium.api.repository.PlantRepository
+import dev.xavierc.herbarium.api.repository.*
+import dev.xavierc.herbarium.api.utils.DateTimeSerializer
+import org.joda.time.DateTime
+import org.kodein.di.DI
 import org.kodein.di.bind
-import org.kodein.di.ktor.di
 import org.kodein.di.singleton
+import java.util.*
 
 
 internal val settings = HoconApplicationConfig(ConfigFactory.defaultApplication(HTTP::class.java.classLoader))
@@ -40,10 +41,26 @@ fun Application.main() {
             .convertRatesTo(TimeUnit.SECONDS)
             .convertDurationsTo(TimeUnit.MILLISECONDS)
             .build()
-        reporter.start(10, TimeUnit.SECONDS)
+//        reporter.start(10, TimeUnit.SECONDS)
     }
     install(ContentNegotiation) {
-        register(ContentType.Application.Json, GsonConverter())
+        gson {
+            registerTypeAdapter(DateTime::class.java, DateTimeSerializer())
+        }
+    }
+    install(DataConversion) {
+        convert<UUID> {
+            decode { values, _ ->
+                values.singleOrNull()?.let { UUID.fromString(it) }
+            }
+            encode {
+                when (it) {
+                    null -> listOf()
+                    is UUID -> listOf(it.toString())
+                    else -> throw DataConversionException("Cannot convert to UUID")
+                }
+            }
+        }
     }
     install(AutoHeadResponse) // see https://ktor.io/docs/autoheadresponse.html
     install(Compression, applicationCompressionConfiguration()) // see https://ktor.io/docs/compression.html
@@ -72,14 +89,22 @@ fun Application.main() {
 
     DatabaseFactory.init()
 
-    di {
-        bind<PlantRepository>() with singleton { PlantRepository() }
+    val di = DI {
+        bind<DataRepository>() with singleton { DataRepository() }
+        bind<PlantRepository>() with singleton { PlantRepository(DataRepository()) }
+        bind<GreenhouseRepository>() with singleton {
+            GreenhouseRepository(
+                DataRepository(),
+                PlantRepository(DataRepository())
+            )
+        }
+        bind<UserRepository>() with singleton { UserRepository() }
     }
 
     install(Routing) {
         ActuatorsApi()
-        GreenhouseApi()
-        PlantApi()
+        GreenhouseApi(di)
+        PlantApi(di)
         HealthApi()
     }
 

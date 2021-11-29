@@ -11,16 +11,16 @@
 */
 package dev.xavierc.herbarium.api.models
 
-import dev.xavierc.herbarium.api.models.Plant
-import dev.xavierc.herbarium.api.models.SensorData
+import com.google.gson.annotations.SerializedName
+import org.joda.time.DateTime
 
 /**
  * 
  * @param uuid Universal unique identifier
  * @param name Name given to the greenhouse by the user
- * @param plants Every plant actived in the greenhouse
- * @param tankLevel 
- * @param lastTimestamp Date time when the last data from this greenhouse was received.
+ * @param plants Every plant active in the greenhouse
+ * @param tankLevel (optional)
+ * @param lastTimestamp Date time when the last data from this greenhouse was received. (optional)
  * @param createdAt When the greenhouse was registered.
  */
 data class Greenhouse(
@@ -28,12 +28,16 @@ data class Greenhouse(
     val uuid: java.util.UUID,
     /* Name given to the greenhouse by the user */
     val name: kotlin.String,
-    /* Every plant actived in the greenhouse */
+    /* Every plant active in the greenhouse */
     val plants: kotlin.collections.List<Plant>,
-    val tankLevel: SensorData,
+    /*  Last tank level registered */
+    @SerializedName(value = "tank_level")
+    val tankLevel: SensorData?,
     /* Date time when the last data from this greenhouse was received. */
-    val lastTimestamp: java.time.OffsetDateTime,
+    @SerializedName(value = "last_timestamp")
+    val lastTimestamp: DateTime?,
     /* When the greenhouse was registered. */
-    val createdAt: java.time.OffsetDateTime
+    @SerializedName(value = "created_at")
+    val createdAt: DateTime
 ) 
 
