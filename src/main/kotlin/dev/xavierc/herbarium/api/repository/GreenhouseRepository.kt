@@ -20,10 +20,12 @@ object Greenhouses : Table("greenhouses") {
     val createdAt: Column<DateTime> = datetime("created_at")
 }
 
-class GreenhouseRepository(private val dataRepository: DataRepository) {
+class GreenhouseRepository(private val dataRepository: DataRepository, private val plantRepository: PlantRepository) {
 
     /**
      * Check if the greenhouse UUID is referenced in the database
+     * @param uuid UUID to validate
+     * @return true if the greenhouse exists
      */
     fun exist(uuid: UUID): Boolean {
         var count = 0
@@ -59,14 +61,27 @@ class GreenhouseRepository(private val dataRepository: DataRepository) {
 
             val lastDataTimestamp = dataRepository.getLastSensorData(greenhouseUuid = uuid)?.timestamp
 
-//            val plants: List<Plant> =
+            val plants: List<Plant> = plantRepository.getPlantsByGreenhouse(uuid)
 
-            greenhouse = Greenhouse(
-                uuid, info[Greenhouses.name], listOf(), tankLevel,
-                lastDataTimestamp, info[Greenhouses.createdAt]
-            )
+            greenhouse = mapToGreenhouse(info, tankLevel, lastDataTimestamp, plants)
         }
 
         return greenhouse
     }
+}
+
+fun mapToGreenhouse(
+    row: ResultRow,
+    tankLevel: SensorData?,
+    lastDataTimestamp: DateTime?,
+    plants: List<Plant>
+): Greenhouse {
+    return Greenhouse(
+        row[Greenhouses.uuid],
+        row[Greenhouses.name],
+        plants,
+        tankLevel,
+        lastDataTimestamp,
+        row[Greenhouses.createdAt]
+    )
 }

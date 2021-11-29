@@ -1,9 +1,6 @@
 package dev.xavierc.herbarium.api.repository
 
-import dev.xavierc.herbarium.api.models.ApiErrorResponse
-import dev.xavierc.herbarium.api.models.Plant
-import dev.xavierc.herbarium.api.models.PlantType
-import dev.xavierc.herbarium.api.models.SensorData
+import dev.xavierc.herbarium.api.models.*
 import dev.xavierc.herbarium.api.utils.exceptions.NotFoundException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -39,6 +36,8 @@ object PlantTypes : Table("plant_types") {
 class PlantRepository(private val dataRepository: DataRepository) {
     /**
      * Check if the plant UUID is referenced in the database
+     * @param uuid UUID to validate
+     * @return true if the plant exists
      */
     fun exists(uuid: UUID): Boolean {
         var count = 0
@@ -146,9 +145,80 @@ class PlantRepository(private val dataRepository: DataRepository) {
             }
         }
     }
+
+    fun getPlantsByGreenhouse(greenhouseUuid: UUID, showRemovedPlants: Boolean = false): List<Plant> {
+        val plants = mutableListOf<Plant>()
+
+        transaction {
+            var query = Plants.rightJoin(PlantTypes).select { Plants.greenhouseUuid eq greenhouseUuid }
+
+            if (!showRemovedPlants) {
+                query = query.andWhere { Plants.removed eq false }
+            }
+
+            val plantsResult = query.associateBy { it[Plants.uuid] }
+
+            val moistureLevels =
+                dataRepository.getLastSensorDataBatch(plantsUuid = plantsResult.keys.toList(), type = SensorData.Type.M)
+                    .associate { it.plantUuid to it.value }
+
+            val valvesStatus =
+                dataRepository.getLastActuatorStateBatch(
+                    plantsUuid = plantsResult.keys.toList(),
+                    type = ActuatorState.Type.V
+                )
+                    .associate { it.plantUuid to it.value }
+            val lightStripStatus =
+                dataRepository.getLastActuatorStateBatch(
+                    plantsUuid = plantsResult.keys.toList(),
+                    type = ActuatorState.Type.L
+                )
+                    .associate { it.plantUuid to it.value }
+
+            val lightLevel =
+                dataRepository.getLastSensorData(greenhouseUuid, type = SensorData.Type.L)?.value
+
+            plantsResult.forEach { uuid, row ->
+                plants.add(
+                    mapToPlant(
+                        row,
+                        mapToPlantTypes(row),
+                        moistureLevels[uuid],
+                        lightLevel,
+                        valvesStatus[uuid],
+                        lightStripStatus[uuid]
+                    )
+                )
+            }
+        }
+
+        return plants
+    }
 }
 
-fun mapPlantTypes(row: ResultRow): PlantType {
+fun mapToPlant(
+    row: ResultRow,
+    type: PlantType,
+    moistureLastReading: Double?,
+    lightLastReading: Double?,
+    valveStatus: Boolean?,
+    lightStripStatus: Boolean?
+): Plant {
+    return Plant(
+        row[Plants.uuid],
+        row[Plants.position],
+        type,
+        row[Plants.plantedAt],
+        moistureLastReading,
+        lightLastReading,
+        row[Plants.oldUuid],
+        valveStatus,
+        lightStripStatus,
+        row[Plants.removed]
+    )
+}
+
+fun mapToPlantTypes(row: ResultRow): PlantType {
     return PlantType(
         row[PlantTypes.id],
         row[PlantTypes.name],

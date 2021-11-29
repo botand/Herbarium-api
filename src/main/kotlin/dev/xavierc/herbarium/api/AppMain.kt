@@ -92,7 +92,12 @@ fun Application.main() {
     val di = DI {
         bind<DataRepository>() with singleton { DataRepository() }
         bind<PlantRepository>() with singleton { PlantRepository(DataRepository()) }
-        bind<GreenhouseRepository>() with singleton { GreenhouseRepository(DataRepository()) }
+        bind<GreenhouseRepository>() with singleton {
+            GreenhouseRepository(
+                DataRepository(),
+                PlantRepository(DataRepository())
+            )
+        }
         bind<UserRepository>() with singleton { UserRepository() }
     }
 
