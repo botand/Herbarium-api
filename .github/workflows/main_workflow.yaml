@@ -122,6 +122,6 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           automatic_release_tag: ${{ needs.validate_tag.outputs.version }}
           title: ${{ needs.validate_tag.outputs.version }}
-          prerelease: false
+          prerelease: true
           files: |
             herbarium-api-${{ needs.validate_tag.outputs.version }}.jar
