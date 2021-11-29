@@ -100,10 +100,9 @@ object Paths {
      * Notify the API a when plant have been added to a greenhouse
      *
      * @param uuid Uuid of the greenhouse
-     * @param position Position of the plant into the greenhouse
      */
-    @Location("/api/greenhouse/{uuid}/plant/{position}")
-    class putPlant(private val uuid: java.util.UUID, private val position: kotlin.Int)
+    @Location("/api/greenhouse/{uuid}/plant")
+    class putPlant(val uuid: java.util.UUID)
 
     /**
      * Always returns a 200.

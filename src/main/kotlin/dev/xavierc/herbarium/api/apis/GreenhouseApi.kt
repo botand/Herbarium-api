@@ -47,102 +47,18 @@ fun Route.GreenhouseApi(di: DI) {
         }
     }
 
-    authenticate("apiKey") {
-    get<Paths.getGreenhouse> {
-        val principal = call.authentication.principal<ApiPrincipal>()!!
-        
-        val exampleContentType = "application/json"
-            val exampleContentString = """{
-              "tank_level" : {
-                "type" : "M",
-                "plant_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                "value" : 0.14658129805029452,
-                "timestamp" : "2000-01-23T04:56:07.000+00:00"
-              },
-              "last_timestamp" : "2000-01-23T04:56:07.000+00:00",
-              "plants" : [ {
-                "light_last_reading" : {
-                  "type" : "M",
-                  "plant_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                  "value" : 0.14658129805029452,
-                  "timestamp" : "2000-01-23T04:56:07.000+00:00"
-                },
-                "valve_status" : {
-                  "type" : "V",
-                  "plant_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                  "value" : true,
-                  "timestamp" : "2000-01-23T04:56:07.000+00:00"
-                },
-                "last_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                "planted_at" : "2000-01-23T04:56:07.000+00:00",
-                "position" : 0,
-                "type" : {
-                  "moisture_goal" : 80.0,
-                  "name" : "Tomato",
-                  "light_exposure_min_duration" : 14.0,
-                  "id" : 6
-                },
-                "moisture_last_reading" : {
-                  "type" : "M",
-                  "plant_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                  "value" : 0.14658129805029452,
-                  "timestamp" : "2000-01-23T04:56:07.000+00:00"
-                },
-                "uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                "light_strip_status" : {
-                  "type" : "V",
-                  "plant_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                  "value" : true,
-                  "timestamp" : "2000-01-23T04:56:07.000+00:00"
-                }
-              }, {
-                "light_last_reading" : {
-                  "type" : "M",
-                  "plant_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                  "value" : 0.14658129805029452,
-                  "timestamp" : "2000-01-23T04:56:07.000+00:00"
-                },
-                "valve_status" : {
-                  "type" : "V",
-                  "plant_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                  "value" : true,
-                  "timestamp" : "2000-01-23T04:56:07.000+00:00"
-                },
-                "last_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                "planted_at" : "2000-01-23T04:56:07.000+00:00",
-                "position" : 0,
-                "type" : {
-                  "moisture_goal" : 80.0,
-                  "name" : "Tomato",
-                  "light_exposure_min_duration" : 14.0,
-                  "id" : 6
-                },
-                "moisture_last_reading" : {
-                  "type" : "M",
-                  "plant_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                  "value" : 0.14658129805029452,
-                  "timestamp" : "2000-01-23T04:56:07.000+00:00"
-                },
-                "uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                "light_strip_status" : {
-                  "type" : "V",
-                  "plant_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                  "value" : true,
-                  "timestamp" : "2000-01-23T04:56:07.000+00:00"
-                }
-              } ],
-              "name" : "name",
-              "created_at" : "2000-01-23T04:56:07.000+00:00",
-              "uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91"
-            }"""
-            
-            when (exampleContentType) {
-                "application/json" -> call.respond(gson.fromJson(exampleContentString, empty::class.java))
-                "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-                else -> call.respondText(exampleContentString)
-            }
+//    authenticate("apiKey") {
+    get<Paths.getGreenhouse> { request ->
+//        val principal = call.authentication.principal<ApiPrincipal>()!!
+        try {
+            val greenhouse = greenhouseRepository.getGreenhouse(request.uuid)
+
+            call.respond(HttpStatusCode.OK, greenhouse)
+        } catch (e: NotFoundException) {
+            call.respond(HttpStatusCode.NotFound)
+        }
     }
-    }
+//    }
 
     authenticate("oauth") {
         get<Paths.getGreenhousesOfUser> {

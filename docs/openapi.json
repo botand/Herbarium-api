@@ -377,7 +377,7 @@
         }
       }
     },
-    "/greenhouse/{uuid}/plant/{position}": {
+    "/greenhouse/{uuid}/plant": {
       "put": {
         "tags": [
           "plant"
@@ -398,20 +398,33 @@
               "$ref": "#/components/schemas/Uuid"
             },
             "required": true
-          },
-          {
-            "name": "position",
-            "in": "path",
-            "description": "Position of the plant into the greenhouse",
-            "schema": {
-              "type": "integer",
-              "minimum": 0
-            },
-            "required": true
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "planted_at": {
+                    "$ref": "#/components/schemas/Datetime"
+                  },
+                  "position": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Position of the plant into the greenhouse"
+                  }
+                },
+                "required": [
+                  "planted_at",
+                  "position"
+                ]
+              }
+            }
+          }
+        },
         "responses": {
-          "200": {
+          "201": {
             "description": "Successful operation. Return the uuid of the plant. When the user confirm the position and the type of the plant, the service will call the greenhouse to specify the plant information.",
             "content": {
               "application/json": {
@@ -583,6 +596,10 @@
         "type": "string",
         "format": "uuid",
         "description": "Universal unique identifier"
+      },
+      "Datetime": {
+        "type": "string",
+        "format": "datetime"
       },
       "GreenhouseDetails": {
         "type": "object",

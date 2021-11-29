@@ -1,11 +1,13 @@
 package dev.xavierc.herbarium.api.repository
 
+import dev.xavierc.herbarium.api.models.ApiErrorResponse
 import dev.xavierc.herbarium.api.models.Plant
 import dev.xavierc.herbarium.api.models.PlantType
 import dev.xavierc.herbarium.api.models.SensorData
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
+import java.security.InvalidParameterException
 import java.util.*
 
 object Plants : Table("plants") {
@@ -13,11 +15,12 @@ object Plants : Table("plants") {
     val oldUuid: Column<UUID?> = uuid("old_uuid").nullable()
     val greenhouseUuid: Column<UUID> =
         uuid("greenhouse_uuid").references(Greenhouses.uuid, onDelete = ReferenceOption.CASCADE)
-    val type: Column<Int> = integer("type").references(PlantTypes.id)
+    val type: Column<Int> = integer("type").references(PlantTypes.id).default(0)
     val position: Column<Int> = integer("position").check { it greaterEq 0 }
-    val overrideMoistureGoal: Column<Double?> = double("override_moisture_goal").check { it greaterEq 0 }.nullable()
+    val overrideMoistureGoal: Column<Double?> =
+        double("override_moisture_goal").check { it.greaterEq(0) and it.lessEq(100.0) }.nullable()
     val overrideLightExposureMinDuration: Column<Double?> =
-        double("override_light_exposure_min_duration").check { it greaterEq 0 }.nullable()
+        double("override_light_exposure_min_duration").check { it.greaterEq(0) and it.lessEq(24) }.nullable()
     val plantedAt: Column<DateTime> = datetime("planted_at")
 
     /* Indicate if the plant was removed from the greenhouse */
@@ -64,7 +67,7 @@ class PlantRepository(private val dataRepository: DataRepository) {
                     Plants.uuid.inList(uuids)
                 }
 
-            if(greenhouseUuid != null) {
+            if (greenhouseUuid != null) {
                 query = query.andWhere { Plants.greenhouseUuid.eq(greenhouseUuid) }
             }
 
@@ -79,6 +82,41 @@ class PlantRepository(private val dataRepository: DataRepository) {
 
         return unknown
     }
+
+    /**
+     * Validate if a specific [position] in the greenhouse is free
+     * @param greenhouseUuid Greenhouse to check
+     * @param position
+     * @return true if the position is free
+     */
+    fun positionFree(greenhouseUuid: UUID, position: Int): Boolean {
+        var count = 0
+        transaction {
+            count = Plants.slice(Plants.uuid).select {
+                Plants.greenhouseUuid.eq(greenhouseUuid) and Plants.position.eq(position) and Plants.removed.eq(false)
+            }.count()
+        }
+
+        return count == 0
+    }
+
+    fun addPlant(greenhouseUuid: UUID, position: Int, plantedAt: DateTime): UUID {
+        lateinit var plantUuid: UUID
+
+        if (!positionFree(greenhouseUuid, position)) {
+            throw InvalidParameterException(ApiErrorResponse.Code.PLANT_POSITION_ALREADY_OCCUPIED.value)
+        }
+
+        transaction {
+            plantUuid = Plants.insert {
+                it[Plants.greenhouseUuid] = greenhouseUuid
+                it[Plants.position] = position
+                it[Plants.plantedAt] = plantedAt
+            } get Plants.uuid
+        }
+
+        return plantUuid
+    }
 }
 
 fun mapPlantTypes(row: ResultRow): PlantType {
@@ -87,17 +125,5 @@ fun mapPlantTypes(row: ResultRow): PlantType {
         row[PlantTypes.name],
         row[PlantTypes.moistureGoal],
         row[PlantTypes.lightExposureMinDuration]
-    )
-}
-
-fun mapPlant(row: ResultRow, moistureLastReading: SensorData?, lightLastReading: SensorData?): Plant {
-    return Plant(
-        row[Plants.uuid],
-        row[Plants.position],
-        mapPlantTypes(row),
-        row[Plants.plantedAt],
-        moistureLastReading?.value,
-        lightLastReading?.value,
-        row[Plants.oldUuid],
     )
 }

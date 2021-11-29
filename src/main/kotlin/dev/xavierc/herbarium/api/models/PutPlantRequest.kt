@@ -11,13 +11,17 @@
 */
 package dev.xavierc.herbarium.api.models
 
+import com.google.gson.annotations.SerializedName
+import org.joda.time.DateTime
 
 /**
- * 
- * @param uuid Universal unique identifier
+ * Body send to the API when a plant is planted
+ * @param position
+ * @param plantedAt
  */
-data class UuidResponse(
-    /* Universal unique identifier */
-    val uuid: java.util.UUID
+data class PutPlantRequest(
+    val position: Int,
+    @SerializedName(value = "planted_at")
+    val plantedAt: DateTime
 ) 
 
