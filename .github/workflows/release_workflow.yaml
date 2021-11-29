@@ -3,7 +3,6 @@ on:
   release:
     types:
       - created
-      - released
 jobs:
   deploy_to_heroku:
     name: Deploy the API to Heroku
