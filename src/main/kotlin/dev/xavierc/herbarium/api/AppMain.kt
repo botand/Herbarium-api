@@ -99,7 +99,7 @@ fun Application.main() {
     install(Routing) {
         ActuatorsApi()
         GreenhouseApi(di)
-        PlantApi()
+        PlantApi(di)
         HealthApi()
     }
 

@@ -1,8 +1,7 @@
 package dev.xavierc.herbarium.api.repository
 
 import dev.xavierc.herbarium.api.applicationDatabaseConfiguration
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object DatabaseFactory {
@@ -32,6 +31,12 @@ object DatabaseFactory {
                 Users,
                 Greenhouses
             )
+
+            if(PlantTypes.select { PlantTypes.id.eq(1) and PlantTypes.name.eq("default") }.count() == 0) {
+                PlantTypes.insert {
+                    it[name] = "default"
+                }
+            }
         }
     }
 }

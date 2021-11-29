@@ -15,7 +15,7 @@ object Plants : Table("plants") {
     val oldUuid: Column<UUID?> = uuid("old_uuid").nullable()
     val greenhouseUuid: Column<UUID> =
         uuid("greenhouse_uuid").references(Greenhouses.uuid, onDelete = ReferenceOption.CASCADE)
-    val type: Column<Int> = integer("type").references(PlantTypes.id).default(0)
+    val type: Column<Int> = integer("type").references(PlantTypes.id).default(1)
     val position: Column<Int> = integer("position").check { it greaterEq 0 }
     val overrideMoistureGoal: Column<Double?> =
         double("override_moisture_goal").check { it.greaterEq(0) and it.lessEq(100.0) }.nullable()

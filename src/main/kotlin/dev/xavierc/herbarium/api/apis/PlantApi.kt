@@ -79,9 +79,9 @@ fun Route.PlantApi(di: DI) {
         }
     }
 
-    authenticate("apiKey") {
+//    authenticate("apiKey") {
         put<Paths.putPlant> { request ->
-            val principal = call.authentication.principal<ApiPrincipal>()!!
+//            val principal = call.authentication.principal<ApiPrincipal>()!!
 
             val payload: PutPlantRequest = call.receive()
 
@@ -109,6 +109,6 @@ fun Route.PlantApi(di: DI) {
             call.respond(HttpStatusCode.Created, UuidResponse(uuid))
 
         }
-    }
+//    }
 
 }
