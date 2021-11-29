@@ -6,7 +6,6 @@ on:
 jobs:
   deploy_to_heroku:
     name: Deploy the API to Heroku
-    if: ${{ github.event.release.draft == 'false' && github.event.release.prerelease == 'false' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
