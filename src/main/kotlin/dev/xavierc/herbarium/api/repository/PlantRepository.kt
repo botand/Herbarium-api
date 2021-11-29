@@ -4,6 +4,7 @@ import dev.xavierc.herbarium.api.models.ApiErrorResponse
 import dev.xavierc.herbarium.api.models.Plant
 import dev.xavierc.herbarium.api.models.PlantType
 import dev.xavierc.herbarium.api.models.SensorData
+import dev.xavierc.herbarium.api.utils.exceptions.NotFoundException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
@@ -25,6 +26,7 @@ object Plants : Table("plants") {
 
     /* Indicate if the plant was removed from the greenhouse */
     val removed: Column<Boolean> = bool("removed").default(false)
+    val removedAt: Column<DateTime?> = datetime("removed_at").nullable()
 }
 
 object PlantTypes : Table("plant_types") {
@@ -45,7 +47,7 @@ class PlantRepository(private val dataRepository: DataRepository) {
             count = Plants
                 .slice(Plants.uuid)
                 .select {
-                    Plants.uuid eq uuid
+                    Plants.uuid.eq(uuid) or Plants.oldUuid.eq(uuid)
                 }.count()
         }
 
@@ -64,7 +66,7 @@ class PlantRepository(private val dataRepository: DataRepository) {
             var query = Plants
                 .slice(Plants.uuid)
                 .select {
-                    Plants.uuid.inList(uuids)
+                    Plants.uuid.inList(uuids) or Plants.oldUuid.inList(uuids)
                 }
 
             if (greenhouseUuid != null) {
@@ -100,6 +102,13 @@ class PlantRepository(private val dataRepository: DataRepository) {
         return count == 0
     }
 
+    /**
+     * Register a new plant
+     * @param greenhouseUuid UUID of the greenhouse on which is the plant
+     * @param position where the plant is hold
+     * @param plantedAt when the plant was planted
+     * @return the UUID of the new plant.
+     */
     fun addPlant(greenhouseUuid: UUID, position: Int, plantedAt: DateTime): UUID {
         lateinit var plantUuid: UUID
 
@@ -116,6 +125,26 @@ class PlantRepository(private val dataRepository: DataRepository) {
         }
 
         return plantUuid
+    }
+
+    /**
+     * Remove a plant from a greenhouse.
+     * @param plantUuid UUID of the plant to remove
+     * @throws InvalidParameterException if the plant has already been removed.
+     */
+    fun removePlant(plantUuid: UUID) {
+        transaction {
+            // Check the plant isn't already removed
+            if (Plants.select { (Plants.uuid.eq(plantUuid) or Plants.oldUuid.eq(plantUuid)) and Plants.removed.eq(true) }
+                    .count() > 0) {
+                throw InvalidParameterException("Plant already removed.")
+            }
+
+            Plants.update({ Plants.uuid.eq(plantUuid) or Plants.oldUuid.eq(plantUuid) }) {
+                it[removed] = true
+                it[removedAt] = DateTime.now()
+            }
+        }
     }
 }
 

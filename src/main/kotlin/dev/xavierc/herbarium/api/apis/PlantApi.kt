@@ -28,6 +28,7 @@ import dev.xavierc.herbarium.api.repository.PlantRepository
 import io.ktor.request.*
 import org.kodein.di.DI
 import org.kodein.di.instance
+import java.security.InvalidParameterException
 
 @KtorExperimentalLocationsAPI
 fun Route.PlantApi(di: DI) {
@@ -37,22 +38,25 @@ fun Route.PlantApi(di: DI) {
     val greenhouseRepository by di.instance<GreenhouseRepository>()
     val plantRepository by di.instance<PlantRepository>()
 
-    authenticate("apiKey") {
-        delete<Paths.deletePlant> {
-            val principal = call.authentication.principal<ApiPrincipal>()!!
+//    authenticate("apiKey") {
+        delete<Paths.deletePlant> { request ->
+//            val principal = call.authentication.principal<ApiPrincipal>()!!
 
-            val exampleContentType = "application/json"
-            val exampleContentString = """{
-              "uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91"
-            }"""
-
-            when (exampleContentType) {
-                "application/json" -> call.respond(gson.fromJson(exampleContentString, empty::class.java))
-                "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-                else -> call.respondText(exampleContentString)
+            // Check plant exist
+            if (!plantRepository.exists(request.plantUuid)) {
+                call.respond(HttpStatusCode.NotFound)
+                return@delete
             }
+
+            try {
+                plantRepository.removePlant(request.plantUuid)
+            } catch (e: InvalidParameterException) {
+                call.respond(HttpStatusCode.Forbidden, ApiErrorResponse(ApiErrorResponse.Code.PLANT_ALREADY_REMOVED))
+                return@delete
+            }
+            call.respond(HttpStatusCode.Accepted)
         }
-    }
+//    }
 
     authenticate("oauth") {
         post<Paths.postActuatorState> {
@@ -88,11 +92,13 @@ fun Route.PlantApi(di: DI) {
             // Validate the request
             if (payload.position >= 16 || payload.position < 0) {
                 call.respond(HttpStatusCode.BadRequest, ApiErrorResponse(ApiErrorResponse.Code.PLANT_POSITION_INVALID))
+                return@put
             }
 
             // Check the greenhouse exists
             if (!greenhouseRepository.exist(request.uuid)) {
                 call.respond(HttpStatusCode.NotFound)
+                return@put
             }
 
             // Check the plant position is free
@@ -101,13 +107,12 @@ fun Route.PlantApi(di: DI) {
                     HttpStatusCode.Forbidden,
                     ApiErrorResponse(ApiErrorResponse.Code.PLANT_POSITION_ALREADY_OCCUPIED)
                 )
+                return@put
             }
 
             // Add the plant
             val uuid = plantRepository.addPlant(request.uuid, payload.position, payload.plantedAt)
-
             call.respond(HttpStatusCode.Created, UuidResponse(uuid))
-
         }
 //    }
 
