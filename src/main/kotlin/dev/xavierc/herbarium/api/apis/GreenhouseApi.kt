@@ -20,6 +20,7 @@ import dev.xavierc.herbarium.api.Paths
 import io.ktor.locations.*
 import io.ktor.routing.*
 import dev.xavierc.herbarium.api.infrastructure.ApiPrincipal
+import dev.xavierc.herbarium.api.infrastructure.FirebasePrincipal
 import dev.xavierc.herbarium.api.models.PutDataRequest
 import dev.xavierc.herbarium.api.repository.DataRepository
 import dev.xavierc.herbarium.api.repository.GreenhouseRepository
@@ -39,9 +40,9 @@ fun Route.GreenhouseApi(di: DI) {
     val plantRepository by di.instance<PlantRepository>()
     val dataRepository by di.instance<DataRepository>()
 
-    authenticate("oauth") {
+    authenticate("firebase") {
         delete<Paths.deleteGreenhouse> {
-            val principal = call.authentication.principal<OAuthAccessTokenResponse>()!!
+            val userUuid = call.authentication.principal<FirebasePrincipal>()!!.userUuid
 
             call.respond(HttpStatusCode.NotImplemented)
         }
@@ -60,9 +61,10 @@ fun Route.GreenhouseApi(di: DI) {
     }
 //    }
 
-    authenticate("oauth") {
+    authenticate("firebase") {
         get<Paths.getGreenhousesOfUser> {
-            val principal = call.authentication.principal<OAuthAccessTokenResponse>()!!
+            val userUuid = call.authentication.principal<FirebasePrincipal>()!!.userUuid
+
 
             val exampleContentType = "application/json"
             val exampleContentString = """{
@@ -157,17 +159,17 @@ fun Route.GreenhouseApi(di: DI) {
         }
     }
 
-    authenticate("oauth") {
+    authenticate("firebase") {
         post<Paths.postActuatorState> {
-            val principal = call.authentication.principal<OAuthAccessTokenResponse>()!!
+            val userUuid = call.authentication.principal<FirebasePrincipal>()!!.userUuid
 
             call.respond(HttpStatusCode.NotImplemented)
         }
     }
 
-    authenticate("oauth") {
+    authenticate("firebase") {
         post<Paths.postGreenhouse> {
-            val principal = call.authentication.principal<OAuthAccessTokenResponse>()!!
+            val userUuid = call.authentication.principal<FirebasePrincipal>()!!.userUuid
 
             call.respond(HttpStatusCode.NotImplemented)
         }
@@ -216,9 +218,9 @@ fun Route.GreenhouseApi(di: DI) {
     }
 //    }
 
-    authenticate("oauth") {
+    authenticate("firebase") {
         put<Paths.putGreenHouse> {
-            val principal = call.authentication.principal<OAuthAccessTokenResponse>()!!
+            val userUuid = call.authentication.principal<FirebasePrincipal>()!!.userUuid
 
             call.respond(HttpStatusCode.NotImplemented)
         }

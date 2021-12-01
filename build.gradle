@@ -67,6 +67,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed:0.17.14")
     implementation("org.postgresql:postgresql:42.3.1")
     implementation("org.kodein.di:kodein-di-framework-ktor-server-jvm:7.9.0")
+    implementation 'com.google.firebase:firebase-admin:8.1.0'
 
     testImplementation("junit:junit:4.13.2")
 }

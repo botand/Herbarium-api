@@ -19,8 +19,8 @@ import io.ktor.response.*
 import dev.xavierc.herbarium.api.Paths
 import io.ktor.locations.*
 import io.ktor.routing.*
-import dev.xavierc.herbarium.api.infrastructure.ApiPrincipal
-import dev.xavierc.herbarium.api.models.ApiErrorResponse
+import dev.xavierc.herbarium.api.infrastructure.FirebasePrincipal
+import dev.xavierc.herbarium.api.models.ErrorCode
 import dev.xavierc.herbarium.api.models.PutPlantRequest
 import dev.xavierc.herbarium.api.models.UuidResponse
 import dev.xavierc.herbarium.api.repository.GreenhouseRepository
@@ -51,24 +51,24 @@ fun Route.PlantApi(di: DI) {
             try {
                 plantRepository.removePlant(request.plantUuid)
             } catch (e: InvalidParameterException) {
-                call.respond(HttpStatusCode.Forbidden, ApiErrorResponse(ApiErrorResponse.Code.PLANT_ALREADY_REMOVED))
+                call.respond(HttpStatusCode.Forbidden, ErrorCode(ErrorCode.Code.PLANT_ALREADY_REMOVED))
                 return@delete
             }
             call.respond(HttpStatusCode.Accepted)
         }
 //    }
 
-    authenticate("oauth") {
+    authenticate("firebase") {
         post<Paths.postActuatorState> {
-            val principal = call.authentication.principal<OAuthAccessTokenResponse>()!!
+            val userUuid = call.authentication.principal<FirebasePrincipal>()!!.userUuid
 
             call.respond(HttpStatusCode.NotImplemented)
         }
     }
 
-    authenticate("oauth") {
+    authenticate("firebase") {
         post<Paths.postUpdatePlant> {
-            val principal = call.authentication.principal<OAuthAccessTokenResponse>()!!
+            val userUuid = call.authentication.principal<FirebasePrincipal>()!!.userUuid
 
             val exampleContentType = "application/json"
             val exampleContentString = """{
@@ -91,7 +91,7 @@ fun Route.PlantApi(di: DI) {
 
             // Validate the request
             if (payload.position >= 16 || payload.position < 0) {
-                call.respond(HttpStatusCode.BadRequest, ApiErrorResponse(ApiErrorResponse.Code.PLANT_POSITION_INVALID))
+                call.respond(HttpStatusCode.BadRequest, ErrorCode(ErrorCode.Code.PLANT_POSITION_INVALID))
                 return@put
             }
 
@@ -105,7 +105,7 @@ fun Route.PlantApi(di: DI) {
             if (!plantRepository.positionFree(request.uuid, payload.position)) {
                 call.respond(
                     HttpStatusCode.Forbidden,
-                    ApiErrorResponse(ApiErrorResponse.Code.PLANT_POSITION_ALREADY_OCCUPIED)
+                    ErrorCode(ErrorCode.Code.PLANT_POSITION_ALREADY_OCCUPIED)
                 )
                 return@put
             }

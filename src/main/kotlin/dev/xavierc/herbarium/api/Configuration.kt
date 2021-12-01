@@ -95,26 +95,3 @@ internal fun applicationCompressionConfiguration(): Compression.Configuration.()
         }
     }
 }
-
-// Defines authentication mechanisms used throughout the application.
-val ApplicationAuthProviders: Map<String, OAuthServerSettings> = listOf<OAuthServerSettings>(
-        OAuthServerSettings.OAuth2ServerSettings(
-            name = "oauth",
-            authorizeUrl = "https://accounts.google.com/o/oauth2/v2/auth",
-            accessTokenUrl = "",
-            requestMethod = HttpMethod.Get,
-            clientId = settings.property("auth.oauth.oauth.clientId").getString(),
-            clientSecret = settings.property("auth.oauth.oauth.clientSecret").getString(),
-            defaultScopes = listOf("read")
-        )
-//        OAuthServerSettings.OAuth2ServerSettings(
-//                name = "facebook",
-//                authorizeUrl = "https://graph.facebook.com/oauth/authorize",
-//                accessTokenUrl = "https://graph.facebook.com/oauth/access_token",
-//                requestMethod = HttpMethod.Post,
-//
-//                clientId = settings.property("auth.oauth.facebook.clientId").getString(),
-//                clientSecret = settings.property("auth.oauth.facebook.clientSecret").getString(),
-//                defaultScopes = listOf("public_profile")
-//        )
-).associateBy { it.name }

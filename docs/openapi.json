@@ -37,7 +37,7 @@
         "operationId": "getGreenhousesOfUser",
         "security": [
           {
-            "oauth": []
+            "firebase": []
           }
         ],
         "responses": {
@@ -79,7 +79,7 @@
         "operationId": "putGreenHouse",
         "security": [
           {
-            "oauth": []
+            "firebase": []
           }
         ],
         "requestBody": {
@@ -197,7 +197,7 @@
         ],
         "security": [
           {
-            "oauth": []
+            "firebase": []
           }
         ],
         "responses": {
@@ -231,7 +231,7 @@
         ],
         "security": [
           {
-            "oauth": []
+            "firebase": []
           }
         ],
         "requestBody": {
@@ -344,7 +344,7 @@
         "operationId": "postActuatorState",
         "security": [
           {
-            "oauth": []
+            "firebase": []
           }
         ],
         "parameters": [
@@ -457,7 +457,7 @@
         "operationId": "postUpdatePlant",
         "security": [
           {
-            "oauth": []
+            "firebase": []
           }
         ],
         "parameters": [
@@ -578,17 +578,11 @@
         "in": "header",
         "name": "X-API-Key"
       },
-      "oauth": {
+      "firebase": {
         "description": "ID Token provided by Firebase when a user is connected.",
-        "type": "oauth2",
-        "flows": {
-          "implicit": {
-            "authorizationUrl": "https://accounts.google.com/o/oauth2/v2/auth",
-            "scopes": {
-              "read": "profile"
-            }
-          }
-        }
+        "type": "http",
+        "bearerFormat": "JWT",
+        "scheme": "bearer"
       }
     },
     "schemas": {
