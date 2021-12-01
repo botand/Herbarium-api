@@ -3,6 +3,7 @@ FROM openjdk:8-jre-alpine
 ARG version
 
 COPY ./build/libs/herbarium-api.jar /root/herbarium-api.jar
+COPY ./firebase_service_account_credentials.json /root/firebase_service_account_credentials.json
 
 WORKDIR /root
 
