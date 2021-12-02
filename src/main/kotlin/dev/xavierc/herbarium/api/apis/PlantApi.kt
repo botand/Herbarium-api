@@ -19,8 +19,9 @@ import io.ktor.response.*
 import dev.xavierc.herbarium.api.Paths
 import io.ktor.locations.*
 import io.ktor.routing.*
-import dev.xavierc.herbarium.api.infrastructure.ApiPrincipal
-import dev.xavierc.herbarium.api.models.ApiErrorResponse
+import dev.xavierc.herbarium.api.infrastructure.FirebasePrincipal
+import dev.xavierc.herbarium.api.models.ErrorCode
+import dev.xavierc.herbarium.api.models.PlantUpdateRequest
 import dev.xavierc.herbarium.api.models.PutPlantRequest
 import dev.xavierc.herbarium.api.models.UuidResponse
 import dev.xavierc.herbarium.api.repository.GreenhouseRepository
@@ -39,81 +40,90 @@ fun Route.PlantApi(di: DI) {
     val plantRepository by di.instance<PlantRepository>()
 
 //    authenticate("apiKey") {
-        delete<Paths.deletePlant> { request ->
+    delete<Paths.deletePlant> { request ->
 //            val principal = call.authentication.principal<ApiPrincipal>()!!
 
-            // Check plant exist
-            if (!plantRepository.exists(request.plantUuid)) {
-                call.respond(HttpStatusCode.NotFound)
-                return@delete
-            }
-
-            try {
-                plantRepository.removePlant(request.plantUuid)
-            } catch (e: InvalidParameterException) {
-                call.respond(HttpStatusCode.Forbidden, ApiErrorResponse(ApiErrorResponse.Code.PLANT_ALREADY_REMOVED))
-                return@delete
-            }
-            call.respond(HttpStatusCode.Accepted)
+        // Check plant exist
+        if (!plantRepository.exists(request.plantUuid)) {
+            call.respond(HttpStatusCode.NotFound)
+            return@delete
         }
+
+        try {
+            plantRepository.removePlant(request.plantUuid)
+        } catch (e: InvalidParameterException) {
+            call.respond(HttpStatusCode.Forbidden, ErrorCode(ErrorCode.Code.PLANT_ALREADY_REMOVED))
+            return@delete
+        }
+        call.respond(HttpStatusCode.Accepted)
+    }
 //    }
 
-    authenticate("oauth") {
+    authenticate("firebase") {
         post<Paths.postActuatorState> {
-            val principal = call.authentication.principal<OAuthAccessTokenResponse>()!!
+            val userUuid = call.authentication.principal<FirebasePrincipal>()!!.userUuid
 
             call.respond(HttpStatusCode.NotImplemented)
         }
     }
 
-    authenticate("oauth") {
-        post<Paths.postUpdatePlant> {
-            val principal = call.authentication.principal<OAuthAccessTokenResponse>()!!
+    authenticate("firebase") {
+        post<Paths.postUpdatePlant> { request ->
+            val userUuid = call.authentication.principal<FirebasePrincipal>()!!.userUuid!!
 
-            val exampleContentType = "application/json"
-            val exampleContentString = """{
-              "uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91"
-            }"""
-
-            when (exampleContentType) {
-                "application/json" -> call.respond(gson.fromJson(exampleContentString, empty::class.java))
-                "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-                else -> call.respondText(exampleContentString)
+            // Check if the plant exists and if the user can edit it.
+            if (!plantRepository.exists(request.plantUuid) || !greenhouseRepository.isUserLinked(
+                    plantRepository.getGreenhouseUuidForPlant(
+                        request.plantUuid
+                    ), userUuid
+                )
+            ) {
+                call.respond(HttpStatusCode.NotFound)
+                return@post
             }
+
+            val plantUpdateRequest: PlantUpdateRequest = call.receive()
+            plantRepository.updatePlant(
+                request.plantUuid,
+                plantUpdateRequest.type.id,
+                plantUpdateRequest.overrideMoistureGoal,
+                plantUpdateRequest.overrideLightExposureMinDuration
+            )
+            call.respond(HttpStatusCode.OK)
         }
     }
 
 //    authenticate("apiKey") {
-        put<Paths.putPlant> { request ->
+    put<Paths.putPlant> { request ->
 //            val principal = call.authentication.principal<ApiPrincipal>()!!
 
-            val payload: PutPlantRequest = call.receive()
+        val payload: PutPlantRequest = call.receive()
 
-            // Validate the request
-            if (payload.position >= 16 || payload.position < 0) {
-                call.respond(HttpStatusCode.BadRequest, ApiErrorResponse(ApiErrorResponse.Code.PLANT_POSITION_INVALID))
-                return@put
-            }
-
-            // Check the greenhouse exists
-            if (!greenhouseRepository.exist(request.uuid)) {
-                call.respond(HttpStatusCode.NotFound)
-                return@put
-            }
-
-            // Check the plant position is free
-            if (!plantRepository.positionFree(request.uuid, payload.position)) {
-                call.respond(
-                    HttpStatusCode.Forbidden,
-                    ApiErrorResponse(ApiErrorResponse.Code.PLANT_POSITION_ALREADY_OCCUPIED)
-                )
-                return@put
-            }
-
-            // Add the plant
-            val uuid = plantRepository.addPlant(request.uuid, payload.position, payload.plantedAt)
-            call.respond(HttpStatusCode.Created, UuidResponse(uuid))
+        // Validate the request
+        if (payload.position >= 16 || payload.position < 0) {
+            call.respond(HttpStatusCode.BadRequest, ErrorCode(ErrorCode.Code.PLANT_POSITION_INVALID))
+            return@put
         }
+
+        // Check the greenhouse exists
+        if (!greenhouseRepository.exist(request.uuid)) {
+            call.respond(HttpStatusCode.NotFound)
+            return@put
+        }
+
+        // Check the plant position is free
+        if (!plantRepository.positionFree(request.uuid, payload.position)) {
+            call.respond(
+                HttpStatusCode.Forbidden,
+                ErrorCode(ErrorCode.Code.PLANT_POSITION_ALREADY_OCCUPIED)
+            )
+            return@put
+        }
+
+        // Add the plant
+        val uuid = plantRepository.addPlant(request.uuid, payload.position, payload.plantedAt)
+        call.respond(HttpStatusCode.Created, UuidResponse(uuid))
+    }
 //    }
 
 }

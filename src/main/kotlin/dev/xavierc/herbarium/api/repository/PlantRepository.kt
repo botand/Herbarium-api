@@ -10,7 +10,6 @@ import java.util.*
 
 object Plants : Table("plants") {
     val uuid: Column<UUID> = uuid("uuid").autoGenerate().primaryKey()
-    val oldUuid: Column<UUID?> = uuid("old_uuid").nullable()
     val greenhouseUuid: Column<UUID> =
         uuid("greenhouse_uuid").references(Greenhouses.uuid, onDelete = ReferenceOption.CASCADE)
     val type: Column<Int> = integer("type").references(PlantTypes.id).default(1)
@@ -46,7 +45,7 @@ class PlantRepository(private val dataRepository: DataRepository) {
             count = Plants
                 .slice(Plants.uuid)
                 .select {
-                    Plants.uuid.eq(uuid) or Plants.oldUuid.eq(uuid)
+                    Plants.uuid eq uuid
                 }.count()
         }
 
@@ -65,7 +64,7 @@ class PlantRepository(private val dataRepository: DataRepository) {
             var query = Plants
                 .slice(Plants.uuid)
                 .select {
-                    Plants.uuid.inList(uuids) or Plants.oldUuid.inList(uuids)
+                    Plants.uuid.inList(uuids)
                 }
 
             if (greenhouseUuid != null) {
@@ -112,7 +111,7 @@ class PlantRepository(private val dataRepository: DataRepository) {
         lateinit var plantUuid: UUID
 
         if (!positionFree(greenhouseUuid, position)) {
-            throw InvalidParameterException(ApiErrorResponse.Code.PLANT_POSITION_ALREADY_OCCUPIED.value)
+            throw InvalidParameterException(ErrorCode.Code.PLANT_POSITION_ALREADY_OCCUPIED.value)
         }
 
         transaction {
@@ -127,6 +126,51 @@ class PlantRepository(private val dataRepository: DataRepository) {
     }
 
     /**
+     * Retrieve the greenhouse UUID of a specific plant
+     * @param uuid of the plant
+     * @throws NotFoundException if the plant doesn't exist
+     * @return UUID of the greenhouse
+     */
+    fun getGreenhouseUuidForPlant(uuid: UUID): UUID {
+        lateinit var greenhouseUuid: UUID
+
+        if (!exists(uuid)) {
+            throw NotFoundException(ErrorCode.Code.NOT_FOUND.toString())
+        }
+
+        transaction {
+            val result = Plants.slice(Plants.greenhouseUuid).select { Plants.uuid eq uuid }.single()
+
+            greenhouseUuid = result[Plants.greenhouseUuid]
+        }
+
+        return greenhouseUuid
+    }
+
+    /**
+     * Update a plant
+     * @param uuid of the plant to update
+     * @param typeId new plant type of the plant
+     * @param overrideMoistureGoal new value for the custom moisture goal
+     * @param overrideLightExposureMinDuration new value for the custom minimum duration exposure
+     * @throws NotFoundException if the plant doesn't exist
+     */
+    fun updatePlant(uuid: UUID, typeId: Int, overrideMoistureGoal: Double?, overrideLightExposureMinDuration: Double?) {
+        // Check if the plant exists
+        if (!exists(uuid)) {
+            throw NotFoundException(ErrorCode.Code.NOT_FOUND.toString())
+        }
+
+        transaction {
+            Plants.update(where = { Plants.uuid eq uuid }) {
+                it[Plants.type] = typeId
+                it[Plants.overrideMoistureGoal] = overrideMoistureGoal
+                it[Plants.overrideLightExposureMinDuration] = overrideLightExposureMinDuration
+            }
+        }
+    }
+
+    /**
      * Remove a plant from a greenhouse.
      * @param plantUuid UUID of the plant to remove
      * @throws InvalidParameterException if the plant has already been removed.
@@ -134,18 +178,24 @@ class PlantRepository(private val dataRepository: DataRepository) {
     fun removePlant(plantUuid: UUID) {
         transaction {
             // Check the plant isn't already removed
-            if (Plants.select { (Plants.uuid.eq(plantUuid) or Plants.oldUuid.eq(plantUuid)) and Plants.removed.eq(true) }
+            if (Plants.select { Plants.uuid.eq(plantUuid) and Plants.removed.eq(true) }
                     .count() > 0) {
                 throw InvalidParameterException("Plant already removed.")
             }
 
-            Plants.update({ Plants.uuid.eq(plantUuid) or Plants.oldUuid.eq(plantUuid) }) {
+            Plants.update({ Plants.uuid eq plantUuid }) {
                 it[removed] = true
                 it[removedAt] = DateTime.now()
             }
         }
     }
 
+    /**
+     * Retrieve all the plants for the specified greenhouse
+     * @param greenhouseUuid UUID of the greenhouse which from retrieve the plants
+     * @param showRemovedPlants do we also retrieve the plants that was removed from the greenhouse
+     * @return all the plants known for the greenhouse
+     */
     fun getPlantsByGreenhouse(greenhouseUuid: UUID, showRemovedPlants: Boolean = false): List<Plant> {
         val plants = mutableListOf<Plant>()
 
@@ -178,7 +228,7 @@ class PlantRepository(private val dataRepository: DataRepository) {
             val lightLevel =
                 dataRepository.getLastSensorData(greenhouseUuid, type = SensorData.Type.L)?.value
 
-            plantsResult.forEach { uuid, row ->
+            plantsResult.forEach { (uuid, row) ->
                 plants.add(
                     mapToPlant(
                         row,
@@ -211,9 +261,10 @@ fun mapToPlant(
         row[Plants.plantedAt],
         moistureLastReading,
         lightLastReading,
-        row[Plants.oldUuid],
         valveStatus,
         lightStripStatus,
+        row[Plants.overrideMoistureGoal],
+        row[Plants.overrideLightExposureMinDuration],
         row[Plants.removed]
     )
 }

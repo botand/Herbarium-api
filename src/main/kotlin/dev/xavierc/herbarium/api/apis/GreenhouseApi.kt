@@ -20,7 +20,11 @@ import dev.xavierc.herbarium.api.Paths
 import io.ktor.locations.*
 import io.ktor.routing.*
 import dev.xavierc.herbarium.api.infrastructure.ApiPrincipal
+import dev.xavierc.herbarium.api.infrastructure.FirebasePrincipal
+import dev.xavierc.herbarium.api.models.GreenhouseDetails
 import dev.xavierc.herbarium.api.models.PutDataRequest
+import dev.xavierc.herbarium.api.models.PutGreenhouseRequest
+import dev.xavierc.herbarium.api.models.UuidResponse
 import dev.xavierc.herbarium.api.repository.DataRepository
 import dev.xavierc.herbarium.api.repository.GreenhouseRepository
 import dev.xavierc.herbarium.api.repository.PlantRepository
@@ -32,18 +36,22 @@ import java.util.*
 
 @KtorExperimentalLocationsAPI
 fun Route.GreenhouseApi(di: DI) {
-    val gson = Gson()
-    val empty = mutableMapOf<String, Any?>()
 
     val greenhouseRepository by di.instance<GreenhouseRepository>()
     val plantRepository by di.instance<PlantRepository>()
     val dataRepository by di.instance<DataRepository>()
 
-    authenticate("oauth") {
-        delete<Paths.deleteGreenhouse> {
-            val principal = call.authentication.principal<OAuthAccessTokenResponse>()!!
+    authenticate("firebase") {
+        delete<Paths.deleteGreenhouse> { request ->
+            val userUuid = call.authentication.principal<FirebasePrincipal>()!!.userUuid!!
 
-            call.respond(HttpStatusCode.NotImplemented)
+            // Check if the user is linked to the greenhouse
+            if (!greenhouseRepository.isUserLinked(request.uuid, userUuid)) {
+                call.respond(HttpStatusCode.NotFound)
+                return@delete
+            }
+            greenhouseRepository.deleteGreenhouse(request.uuid)
+            call.respond(HttpStatusCode.OK)
         }
     }
 
@@ -60,116 +68,36 @@ fun Route.GreenhouseApi(di: DI) {
     }
 //    }
 
-    authenticate("oauth") {
+    authenticate("firebase") {
         get<Paths.getGreenhousesOfUser> {
-            val principal = call.authentication.principal<OAuthAccessTokenResponse>()!!
+            val userUuid = call.authentication.principal<FirebasePrincipal>()!!.userUuid!!
 
-            val exampleContentType = "application/json"
-            val exampleContentString = """{
-              "tank_level" : {
-                "type" : "M",
-                "plant_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                "value" : 0.14658129805029452,
-                "timestamp" : "2000-01-23T04:56:07.000+00:00"
-              },
-              "last_timestamp" : "2000-01-23T04:56:07.000+00:00",
-              "plants" : [ {
-                "light_last_reading" : {
-                  "type" : "M",
-                  "plant_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                  "value" : 0.14658129805029452,
-                  "timestamp" : "2000-01-23T04:56:07.000+00:00"
-                },
-                "valve_status" : {
-                  "type" : "V",
-                  "plant_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                  "value" : true,
-                  "timestamp" : "2000-01-23T04:56:07.000+00:00"
-                },
-                "last_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                "planted_at" : "2000-01-23T04:56:07.000+00:00",
-                "position" : 0,
-                "type" : {
-                  "moisture_goal" : 80.0,
-                  "name" : "Tomato",
-                  "light_exposure_min_duration" : 14.0,
-                  "id" : 6
-                },
-                "moisture_last_reading" : {
-                  "type" : "M",
-                  "plant_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                  "value" : 0.14658129805029452,
-                  "timestamp" : "2000-01-23T04:56:07.000+00:00"
-                },
-                "uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                "light_strip_status" : {
-                  "type" : "V",
-                  "plant_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                  "value" : true,
-                  "timestamp" : "2000-01-23T04:56:07.000+00:00"
-                }
-              }, {
-                "light_last_reading" : {
-                  "type" : "M",
-                  "plant_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                  "value" : 0.14658129805029452,
-                  "timestamp" : "2000-01-23T04:56:07.000+00:00"
-                },
-                "valve_status" : {
-                  "type" : "V",
-                  "plant_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                  "value" : true,
-                  "timestamp" : "2000-01-23T04:56:07.000+00:00"
-                },
-                "last_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                "planted_at" : "2000-01-23T04:56:07.000+00:00",
-                "position" : 0,
-                "type" : {
-                  "moisture_goal" : 80.0,
-                  "name" : "Tomato",
-                  "light_exposure_min_duration" : 14.0,
-                  "id" : 6
-                },
-                "moisture_last_reading" : {
-                  "type" : "M",
-                  "plant_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                  "value" : 0.14658129805029452,
-                  "timestamp" : "2000-01-23T04:56:07.000+00:00"
-                },
-                "uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                "light_strip_status" : {
-                  "type" : "V",
-                  "plant_uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-                  "value" : true,
-                  "timestamp" : "2000-01-23T04:56:07.000+00:00"
-                }
-              } ],
-              "name" : "name",
-              "created_at" : "2000-01-23T04:56:07.000+00:00",
-              "uuid" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91"
-            }"""
+            val greenhouses = greenhouseRepository.getGreenhousesByUserUid(userUuid)
 
-            when (exampleContentType) {
-                "application/json" -> call.respond(gson.fromJson(exampleContentString, empty::class.java))
-                "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-                else -> call.respondText(exampleContentString)
-            }
+            call.respond(HttpStatusCode.OK, greenhouses)
         }
     }
 
-    authenticate("oauth") {
+    authenticate("firebase") {
         post<Paths.postActuatorState> {
-            val principal = call.authentication.principal<OAuthAccessTokenResponse>()!!
+            val userUuid = call.authentication.principal<FirebasePrincipal>()!!.userUuid
 
             call.respond(HttpStatusCode.NotImplemented)
         }
     }
 
-    authenticate("oauth") {
-        post<Paths.postGreenhouse> {
-            val principal = call.authentication.principal<OAuthAccessTokenResponse>()!!
+    authenticate("firebase") {
+        post<Paths.postGreenhouse> { request ->
+            val userUuid = call.authentication.principal<FirebasePrincipal>()!!.userUuid!!
 
-            call.respond(HttpStatusCode.NotImplemented)
+            if (!greenhouseRepository.isUserLinked(request.uuid, userUuid)) {
+                call.respond(HttpStatusCode.NotFound)
+                return@post
+            }
+            val greenhouseDetails: GreenhouseDetails = call.receive()
+
+            greenhouseRepository.updateGreenhouseDetails(request.uuid, greenhouseDetails.name)
+            call.respond(HttpStatusCode.OK)
         }
     }
 
@@ -216,11 +144,13 @@ fun Route.GreenhouseApi(di: DI) {
     }
 //    }
 
-    authenticate("oauth") {
+    authenticate("firebase") {
         put<Paths.putGreenHouse> {
-            val principal = call.authentication.principal<OAuthAccessTokenResponse>()!!
+            val userUuid = call.authentication.principal<FirebasePrincipal>()!!.userUuid!!
+            val putGreenhouseRequest: PutGreenhouseRequest = call.receive()
 
-            call.respond(HttpStatusCode.NotImplemented)
+            val uuid = greenhouseRepository.addGreenhouse(userUuid, putGreenhouseRequest.greenhouseName)
+            call.respond(HttpStatusCode.Created, UuidResponse(uuid))
         }
     }
 }

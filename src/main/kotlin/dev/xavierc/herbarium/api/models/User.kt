@@ -14,7 +14,7 @@ import java.util.UUID
  * @param joinedOn when the user account was created
  */
 data class User(
-    val uuid: UUID,
+    val uuid: String,
     @SerializedName(value = "display_name")
     val displayName: String,
     val email: String,
