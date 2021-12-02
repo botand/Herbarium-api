@@ -10,6 +10,12 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
+      - name: Decrypt the secrets files
+        run: |
+          chmod +x ./scripts/decrypt.sh
+          ./scripts/decrypt.sh
+        env:
+          ENCRYPTED_FIREBASE_SERVICE_ACCOUNT_CREDENTIALS: ${{ secrets.ENCRYPTED_FIREBASE_SERVICE_ACCOUNT_CREDENTIALS }}
       - name: Create build folder
         run: |
           mkdir build build/libs
