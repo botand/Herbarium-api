@@ -657,6 +657,14 @@
         "properties": {
           "type": {
             "$ref": "#/components/schemas/PlantType"
+          },
+          "override_moisture_goal": {
+            "type": "number",
+            "description": "Override of the moisture goal by the user"
+          },
+          "override_light_exposure_min_duration": {
+            "type": "integer",
+            "description": "Override of the light exposure by the user"
           }
         },
         "required": [

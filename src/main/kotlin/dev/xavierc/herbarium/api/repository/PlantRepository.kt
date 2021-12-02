@@ -111,7 +111,7 @@ class PlantRepository(private val dataRepository: DataRepository) {
         lateinit var plantUuid: UUID
 
         if (!positionFree(greenhouseUuid, position)) {
-            throw InvalidParameterException(ApiErrorResponse.Code.PLANT_POSITION_ALREADY_OCCUPIED.value)
+            throw InvalidParameterException(ErrorCode.Code.PLANT_POSITION_ALREADY_OCCUPIED.value)
         }
 
         transaction {
@@ -123,6 +123,51 @@ class PlantRepository(private val dataRepository: DataRepository) {
         }
 
         return plantUuid
+    }
+
+    /**
+     * Retrieve the greenhouse UUID of a specific plant
+     * @param uuid of the plant
+     * @throws NotFoundException if the plant doesn't exist
+     * @return UUID of the greenhouse
+     */
+    fun getGreenhouseUuidForPlant(uuid: UUID): UUID {
+        lateinit var greenhouseUuid: UUID
+
+        if (!exists(uuid)) {
+            throw NotFoundException(ErrorCode.Code.NOT_FOUND.toString())
+        }
+
+        transaction {
+            val result = Plants.slice(Plants.greenhouseUuid).select { Plants.uuid eq uuid }.single()
+
+            greenhouseUuid = result[Plants.greenhouseUuid]
+        }
+
+        return greenhouseUuid
+    }
+
+    /**
+     * Update a plant
+     * @param uuid of the plant to update
+     * @param typeId new plant type of the plant
+     * @param overrideMoistureGoal new value for the custom moisture goal
+     * @param overrideLightExposureMinDuration new value for the custom minimum duration exposure
+     * @throws NotFoundException if the plant doesn't exist
+     */
+    fun updatePlant(uuid: UUID, typeId: Int, overrideMoistureGoal: Double?, overrideLightExposureMinDuration: Double?) {
+        // Check if the plant exists
+        if (!exists(uuid)) {
+            throw NotFoundException(ErrorCode.Code.NOT_FOUND.toString())
+        }
+
+        transaction {
+            Plants.update(where = { Plants.uuid eq uuid }) {
+                it[Plants.type] = typeId
+                it[Plants.overrideMoistureGoal] = overrideMoistureGoal
+                it[Plants.overrideLightExposureMinDuration] = overrideLightExposureMinDuration
+            }
+        }
     }
 
     /**

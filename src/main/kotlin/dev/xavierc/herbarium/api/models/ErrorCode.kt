@@ -16,8 +16,8 @@ package dev.xavierc.herbarium.api.models
  * 
  * @param code 
  */
-data class ApiErrorResponse(
-    val code: ApiErrorResponse.Code? = null
+data class ErrorCode(
+    val code: ErrorCode.Code? = null
 ) 
 {
     /**
@@ -27,7 +27,9 @@ data class ApiErrorResponse(
     enum class Code(val value: kotlin.String){
         PLANT_POSITION_INVALID("PLANT_POSITION_INVALID"),
         PLANT_POSITION_ALREADY_OCCUPIED("PLANT_POSITION_ALREADY_OCCUPIED"),
-        PLANT_ALREADY_REMOVED("PLANT_ALREADY_REMOVED")
+        PLANT_ALREADY_REMOVED("PLANT_ALREADY_REMOVED"),
+        USER_ALREADY_EXISTS("USER_ALREADY_EXISTS"),
+        NOT_FOUND("NOT_FOUND")
     }
 }
 

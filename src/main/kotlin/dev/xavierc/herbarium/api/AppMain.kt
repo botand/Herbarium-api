@@ -1,9 +1,7 @@
 package dev.xavierc.herbarium.api
 
 import com.codahale.metrics.Slf4jReporter
-import com.google.auth.oauth2.GoogleCredentials
 import com.google.firebase.FirebaseApp
-import com.google.firebase.FirebaseOptions
 import com.typesafe.config.ConfigFactory
 import dev.xavierc.herbarium.api.apis.ActuatorsApi
 import dev.xavierc.herbarium.api.apis.GreenhouseApi
@@ -26,6 +24,7 @@ import io.ktor.util.*
 import org.joda.time.DateTime
 import org.kodein.di.DI
 import org.kodein.di.bind
+import org.kodein.di.instance
 import org.kodein.di.singleton
 import java.io.FileInputStream
 import java.util.*
@@ -75,6 +74,20 @@ fun Application.main() {
     install(HSTS, applicationHstsConfiguration()) // see https://ktor.io/docs/hsts.html
     install(Locations) // see https://ktor.io/docs/features-locations.html
 
+    DatabaseFactory.init()
+
+    val di = DI {
+        bind<DataRepository>() with singleton { DataRepository() }
+        bind<PlantRepository>() with singleton { PlantRepository(DataRepository()) }
+        bind<GreenhouseRepository>() with singleton {
+            GreenhouseRepository(
+                DataRepository(),
+                PlantRepository(DataRepository())
+            )
+        }
+        bind<UserRepository>() with singleton { UserRepository() }
+    }
+
     FirebaseApp.initializeApp()
 
     install(Authentication) {
@@ -89,25 +102,18 @@ fun Application.main() {
         }
         firebase("firebase", FirebaseApp.getInstance()) {
             validate { credential: FirebaseCredential ->
-                FirebasePrincipal(
+                // Check if user exists. and create him if not
+                val userRepository by di.instance<UserRepository>()
+
+                if (!userRepository.exists(credential.token.uid)) {
+                    userRepository.insertUser(credential.token.uid, credential.token.name, credential.token.email)
+                }
+
+                return@validate FirebasePrincipal(
                     userUuid = credential.token.uid
                 )
             }
         }
-    }
-
-    DatabaseFactory.init()
-
-    val di = DI {
-        bind<DataRepository>() with singleton { DataRepository() }
-        bind<PlantRepository>() with singleton { PlantRepository(DataRepository()) }
-        bind<GreenhouseRepository>() with singleton {
-            GreenhouseRepository(
-                DataRepository(),
-                PlantRepository(DataRepository())
-            )
-        }
-        bind<UserRepository>() with singleton { UserRepository() }
     }
 
     install(Routing) {

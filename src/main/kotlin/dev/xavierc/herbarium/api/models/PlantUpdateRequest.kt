@@ -11,6 +11,7 @@
 */
 package dev.xavierc.herbarium.api.models
 
+import com.google.gson.annotations.SerializedName
 import dev.xavierc.herbarium.api.models.PlantType
 
 /**
@@ -18,6 +19,10 @@ import dev.xavierc.herbarium.api.models.PlantType
  * @param type 
  */
 data class PlantUpdateRequest(
-    val type: PlantType
+    val type: PlantType,
+    @SerializedName(value="override_moisture_goal")
+    val overrideMoistureGoal: Double?,
+    @SerializedName(value="override_light_exposure_min_duration")
+    val overrideLightExposureMinDuration: Double?,
 ) 
 

@@ -45,7 +45,7 @@ object Paths {
      * @param uuid Uuid of the greenhouse to delete
      */
     @Location("/api/greenhouse/{uuid}")
-    class deleteGreenhouse(private val uuid: java.util.UUID)
+    class deleteGreenhouse(val uuid: java.util.UUID)
 
     /**
      * Retrieve the greenhouse details
@@ -56,7 +56,7 @@ object Paths {
     class getGreenhouse(val uuid: java.util.UUID)
 
     /**
-     * Retrieve every greenhouses linked to the connected user
+     * Retrieve every greenhouse linked to the connected user
      *
      */
     @Location("/api/greenhouses")
@@ -66,18 +66,15 @@ object Paths {
      * Update the basic information of the greenhouse.
      *
      * @param uuid Uuid of the greenhouse to update
-     * @param greenhouseDetails
      */
     @Location("/api/greenhouse/{uuid}")
-    class postGreenhouse(private val uuid: java.util.UUID, private val greenhouseDetails: GreenhouseDetails)
+    class postGreenhouse(val uuid: java.util.UUID)
 
     /**
      * Register a new greenhouse
-     *
-     * @param putGreenhouseRequest
      */
     @Location("/api/greenhouse/register")
-    class putGreenHouse(private val putGreenhouseRequest: PutGreenhouseRequest)
+    class putGreenHouse()
 
     /**
      * Notify the API when a plant have been removed
@@ -91,10 +88,9 @@ object Paths {
      * Update the details of a plant
      *
      * @param plantUuid Uuid of the plant
-     * @param plantUpdateRequest  (optional)
      */
     @Location("/api/plant/{plantUuid}")
-    class postUpdatePlant(private val plantUuid: java.util.UUID, private val plantUpdateRequest: PlantUpdateRequest? = null)
+    class postUpdatePlant(val plantUuid: java.util.UUID)
 
     /**
      * Notify the API a when plant have been added to a greenhouse
