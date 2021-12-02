@@ -10,7 +10,6 @@ import java.util.*
 
 object Plants : Table("plants") {
     val uuid: Column<UUID> = uuid("uuid").autoGenerate().primaryKey()
-    val oldUuid: Column<UUID?> = uuid("old_uuid").nullable()
     val greenhouseUuid: Column<UUID> =
         uuid("greenhouse_uuid").references(Greenhouses.uuid, onDelete = ReferenceOption.CASCADE)
     val type: Column<Int> = integer("type").references(PlantTypes.id).default(1)
@@ -46,7 +45,7 @@ class PlantRepository(private val dataRepository: DataRepository) {
             count = Plants
                 .slice(Plants.uuid)
                 .select {
-                    Plants.uuid.eq(uuid) or Plants.oldUuid.eq(uuid)
+                    Plants.uuid eq uuid
                 }.count()
         }
 
@@ -65,7 +64,7 @@ class PlantRepository(private val dataRepository: DataRepository) {
             var query = Plants
                 .slice(Plants.uuid)
                 .select {
-                    Plants.uuid.inList(uuids) or Plants.oldUuid.inList(uuids)
+                    Plants.uuid.inList(uuids)
                 }
 
             if (greenhouseUuid != null) {
@@ -134,18 +133,24 @@ class PlantRepository(private val dataRepository: DataRepository) {
     fun removePlant(plantUuid: UUID) {
         transaction {
             // Check the plant isn't already removed
-            if (Plants.select { (Plants.uuid.eq(plantUuid) or Plants.oldUuid.eq(plantUuid)) and Plants.removed.eq(true) }
+            if (Plants.select { Plants.uuid.eq(plantUuid) and Plants.removed.eq(true) }
                     .count() > 0) {
                 throw InvalidParameterException("Plant already removed.")
             }
 
-            Plants.update({ Plants.uuid.eq(plantUuid) or Plants.oldUuid.eq(plantUuid) }) {
+            Plants.update({ Plants.uuid eq plantUuid }) {
                 it[removed] = true
                 it[removedAt] = DateTime.now()
             }
         }
     }
 
+    /**
+     * Retrieve all the plants for the specified greenhouse
+     * @param greenhouseUuid UUID of the greenhouse which from retrieve the plants
+     * @param showRemovedPlants do we also retrieve the plants that was removed from the greenhouse
+     * @return all the plants known for the greenhouse
+     */
     fun getPlantsByGreenhouse(greenhouseUuid: UUID, showRemovedPlants: Boolean = false): List<Plant> {
         val plants = mutableListOf<Plant>()
 
@@ -178,7 +183,7 @@ class PlantRepository(private val dataRepository: DataRepository) {
             val lightLevel =
                 dataRepository.getLastSensorData(greenhouseUuid, type = SensorData.Type.L)?.value
 
-            plantsResult.forEach { uuid, row ->
+            plantsResult.forEach { (uuid, row) ->
                 plants.add(
                     mapToPlant(
                         row,
@@ -211,9 +216,10 @@ fun mapToPlant(
         row[Plants.plantedAt],
         moistureLastReading,
         lightLastReading,
-        row[Plants.oldUuid],
         valveStatus,
         lightStripStatus,
+        row[Plants.overrideMoistureGoal],
+        row[Plants.overrideLightExposureMinDuration],
         row[Plants.removed]
     )
 }

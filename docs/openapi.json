@@ -667,9 +667,6 @@
         "description": "Representation of a plant in a greenhouse.",
         "type": "object",
         "properties": {
-          "last_uuid": {
-            "$ref": "#/components/schemas/Uuid"
-          },
           "uuid": {
             "$ref": "#/components/schemas/Uuid"
           },
@@ -697,6 +694,19 @@
           },
           "light_strip_status": {
             "$ref": "#/components/schemas/ActuatorState"
+          },
+          "override_moisture_goal": {
+            "type": "number",
+            "description": "Override of the moisture goal by the user"
+          },
+          "override_light_exposure_min_duration": {
+            "type": "integer",
+            "description": "Override of the light exposure by the user"
+          },
+          "removed": {
+            "type": "boolean",
+            "default": false,
+            "description": "Indicate if the plant was removed from the greenhouse in the last 7 days"
           }
         },
         "required": [

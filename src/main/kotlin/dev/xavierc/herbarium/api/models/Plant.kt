@@ -39,13 +39,14 @@ data class Plant(
     val moistureLastReading: Double?,
     @SerializedName(value = "light_last_reading")
     val lightLastReading: Double?,
-    /* Universal unique identifier */
-    @SerializedName(value = "last_uuid")
-    val lastUuid: java.util.UUID? = null,
     @SerializedName(value = "valve_status")
     val valveStatus: Boolean? = null,
     @SerializedName(value = "light_strip_status")
     val lightStripStatus: Boolean? = null,
+    @SerializedName(value = "override_moisture_goal")
+    val overrideMoistureGoal: Double?,
+    @SerializedName(value = "override_light_exposure_min_duration")
+    val overrideLightExposureMinDuration: Double?,
     /* Indicate if the plant was removed from the greenhouse */
     val removed: Boolean = false
 ) 
