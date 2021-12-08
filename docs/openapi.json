@@ -753,6 +753,16 @@
             "description": "Number of hour needed for the plant to perfectly grow.",
             "example": 14,
             "default": 14
+          },
+          "germination_time": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Maximum number of days the plant is in the germination stade"
+          },
+          "growing_time": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Maximum number of days the plant is in the growing stade"
           }
         },
         "required": [

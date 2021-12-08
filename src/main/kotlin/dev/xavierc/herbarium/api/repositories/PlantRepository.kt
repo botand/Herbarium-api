@@ -30,6 +30,8 @@ object PlantTypes : Table("plant_types") {
     val name: Column<String> = varchar("name", length = 512)
     val moistureGoal: Column<Double> = double("moisture_goal").default(80.0)
     val lightExposureMinDuration: Column<Double> = double("light_exposure_min_duration").default(14.0)
+    val germinationTime: Column<Int> = integer("germination_time").default(0)
+    val growingTime: Column<Int> = integer("growing_time").default(0)
 }
 
 class PlantRepository(private val dataRepository: DataRepository) {
@@ -274,6 +276,8 @@ fun mapToPlantTypes(row: ResultRow): PlantType {
         row[PlantTypes.id],
         row[PlantTypes.name],
         row[PlantTypes.moistureGoal],
-        row[PlantTypes.lightExposureMinDuration]
+        row[PlantTypes.lightExposureMinDuration],
+        row[PlantTypes.germinationTime],
+        row[PlantTypes.growingTime]
     )
 }

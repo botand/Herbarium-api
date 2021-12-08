@@ -23,7 +23,7 @@ import com.google.gson.annotations.SerializedName
  */
 data class PlantType(
     /* Unique identifier of the type. */
-    val id: kotlin.Int,
+    val id: Int,
     /* Name of the plant. */
     val name: kotlin.String,
     /* Percentage of moisture needed for the plant to perfectly grow. */
@@ -31,6 +31,12 @@ data class PlantType(
     val moistureGoal: Double,
     /* Number of hour needed for the plant to perfectly grow. */
     @SerializedName(value = "light_exposure_min_duration")
-    val lightExposureMinDuration: Double
+    val lightExposureMinDuration: Double,
+    /* How many days the germination can take. */
+    @SerializedName(value = "germination_time")
+    val germinationTime: Int,
+    /* How many days the plant can take to growth. */
+    @SerializedName(value = "growing_time")
+    val growingTime: Int,
 ) 
 
