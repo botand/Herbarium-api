@@ -11,7 +11,6 @@
  */
 package dev.xavierc.herbarium.api.apis
 
-import com.google.gson.Gson
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*
@@ -19,15 +18,14 @@ import io.ktor.response.*
 import dev.xavierc.herbarium.api.Paths
 import io.ktor.locations.*
 import io.ktor.routing.*
-import dev.xavierc.herbarium.api.infrastructure.ApiPrincipal
 import dev.xavierc.herbarium.api.infrastructure.FirebasePrincipal
 import dev.xavierc.herbarium.api.models.GreenhouseDetails
 import dev.xavierc.herbarium.api.models.PutDataRequest
 import dev.xavierc.herbarium.api.models.PutGreenhouseRequest
 import dev.xavierc.herbarium.api.models.UuidResponse
-import dev.xavierc.herbarium.api.repository.DataRepository
-import dev.xavierc.herbarium.api.repository.GreenhouseRepository
-import dev.xavierc.herbarium.api.repository.PlantRepository
+import dev.xavierc.herbarium.api.repositories.DataRepository
+import dev.xavierc.herbarium.api.repositories.GreenhouseRepository
+import dev.xavierc.herbarium.api.repositories.PlantRepository
 import dev.xavierc.herbarium.api.utils.exceptions.NotFoundException
 import io.ktor.request.*
 import org.kodein.di.DI

@@ -1,4 +1,4 @@
-package dev.xavierc.herbarium.api.repository
+package dev.xavierc.herbarium.api.repositories
 
 import dev.xavierc.herbarium.api.models.ActuatorState
 import dev.xavierc.herbarium.api.models.SensorData
@@ -68,7 +68,7 @@ class DataRepository {
                 query = query.andWhere { SensorsData.type eq type.value }
             }
 
-            val info = query.singleOrNull()
+            val info = query.limit(1).singleOrNull()
 
             if (info != null) {
                 sensorData = mapToSensorData(info)

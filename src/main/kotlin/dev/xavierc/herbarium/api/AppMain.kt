@@ -8,7 +8,7 @@ import dev.xavierc.herbarium.api.apis.GreenhouseApi
 import dev.xavierc.herbarium.api.apis.HealthApi
 import dev.xavierc.herbarium.api.apis.PlantApi
 import dev.xavierc.herbarium.api.infrastructure.*
-import dev.xavierc.herbarium.api.repository.*
+import dev.xavierc.herbarium.api.repositories.*
 import dev.xavierc.herbarium.api.utils.DateTimeSerializer
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -26,7 +26,6 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
 import org.kodein.di.singleton
-import java.io.FileInputStream
 import java.util.*
 import java.util.concurrent.TimeUnit
 
