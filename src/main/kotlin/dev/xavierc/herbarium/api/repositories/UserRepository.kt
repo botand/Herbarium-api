@@ -1,4 +1,4 @@
-package dev.xavierc.herbarium.api.repository
+package dev.xavierc.herbarium.api.repositories
 
 import dev.xavierc.herbarium.api.models.ErrorCode
 import dev.xavierc.herbarium.api.models.User
@@ -10,7 +10,6 @@ import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import java.security.InvalidParameterException
-import java.util.*
 
 /**
  * Table containing all the data read by the sensors

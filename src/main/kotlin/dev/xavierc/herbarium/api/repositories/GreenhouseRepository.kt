@@ -1,11 +1,10 @@
-package dev.xavierc.herbarium.api.repository
+package dev.xavierc.herbarium.api.repositories
 
 import dev.xavierc.herbarium.api.models.ErrorCode
 import dev.xavierc.herbarium.api.models.Greenhouse
 import dev.xavierc.herbarium.api.models.Plant
 import dev.xavierc.herbarium.api.models.SensorData
 import dev.xavierc.herbarium.api.utils.exceptions.NotFoundException
-import org.jetbrains.exposed.dao.UUIDTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
@@ -188,7 +187,7 @@ fun mapToGreenhouse(
         row[Greenhouses.name],
         plants,
         tankLevel,
-        lastDataTimestamp,
+        lastDataTimestamp ?: row[Greenhouses.createdAt],
         row[Greenhouses.createdAt]
     )
 }

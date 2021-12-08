@@ -692,10 +692,10 @@
             "description": "When the plant was planted."
           },
           "moisture_last_reading": {
-            "$ref": "#/components/schemas/SensorData"
+            "type": "number"
           },
           "light_last_reading": {
-            "$ref": "#/components/schemas/SensorData"
+            "type": "number"
           },
           "valve_status": {
             "$ref": "#/components/schemas/ActuatorState"

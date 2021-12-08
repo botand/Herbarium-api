@@ -1,4 +1,4 @@
-package dev.xavierc.herbarium.api.repository
+package dev.xavierc.herbarium.api.repositories
 
 import dev.xavierc.herbarium.api.models.*
 import dev.xavierc.herbarium.api.utils.exceptions.NotFoundException

@@ -24,8 +24,8 @@ import dev.xavierc.herbarium.api.models.ErrorCode
 import dev.xavierc.herbarium.api.models.PlantUpdateRequest
 import dev.xavierc.herbarium.api.models.PutPlantRequest
 import dev.xavierc.herbarium.api.models.UuidResponse
-import dev.xavierc.herbarium.api.repository.GreenhouseRepository
-import dev.xavierc.herbarium.api.repository.PlantRepository
+import dev.xavierc.herbarium.api.repositories.GreenhouseRepository
+import dev.xavierc.herbarium.api.repositories.PlantRepository
 import io.ktor.request.*
 import org.kodein.di.DI
 import org.kodein.di.instance
