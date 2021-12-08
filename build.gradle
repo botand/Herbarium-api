@@ -1,5 +1,5 @@
 group "dev.xavierc.herbarium"
-version "0.5.1"
+version "0.5.2"
 
 wrapper {
     gradleVersion = "6.9"
