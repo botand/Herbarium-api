@@ -278,6 +278,6 @@ fun mapToPlantTypes(row: ResultRow): PlantType {
         row[PlantTypes.moistureGoal],
         row[PlantTypes.lightExposureMinDuration],
         row[PlantTypes.germinationTime],
-        row[PlantTypes.growingTime],
+        row[PlantTypes.growingTime]
     )
 }
