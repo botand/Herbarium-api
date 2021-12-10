@@ -188,6 +188,9 @@ class PlantRepository(private val dataRepository: DataRepository) {
         }
 
         transaction {
+            if(typeId != null && !plantTypeExists(typeId)) {
+                throw NotFoundException(ErrorCode.Code.DONT_EXISTS.toString())
+            }
             Plants.update(where = { Plants.uuid eq uuid }) {
                 if(typeId != null) {
                     it[Plants.type] = typeId
