@@ -19,7 +19,8 @@ import dev.xavierc.herbarium.api.models.PlantType
  * @param type 
  */
 data class PlantUpdateRequest(
-    val type: PlantType,
+    @SerializedName(value="type_id")
+    val typeId: Int?,
     @SerializedName(value="override_moisture_goal")
     val overrideMoistureGoal: Double?,
     @SerializedName(value="override_light_exposure_min_duration")

@@ -26,6 +26,7 @@ import dev.xavierc.herbarium.api.models.PutPlantRequest
 import dev.xavierc.herbarium.api.models.UuidResponse
 import dev.xavierc.herbarium.api.repositories.GreenhouseRepository
 import dev.xavierc.herbarium.api.repositories.PlantRepository
+import dev.xavierc.herbarium.api.utils.exceptions.NotFoundException
 import io.ktor.request.*
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -83,13 +84,17 @@ fun Route.PlantApi(di: DI) {
             }
 
             val plantUpdateRequest: PlantUpdateRequest = call.receive()
-            plantRepository.updatePlant(
-                request.plantUuid,
-                plantUpdateRequest.type.id,
-                plantUpdateRequest.overrideMoistureGoal,
-                plantUpdateRequest.overrideLightExposureMinDuration
-            )
-            call.respond(HttpStatusCode.OK)
+            try {
+                plantRepository.updatePlant(
+                    request.plantUuid,
+                    plantUpdateRequest.typeId,
+                    plantUpdateRequest.overrideMoistureGoal,
+                    plantUpdateRequest.overrideLightExposureMinDuration
+                )
+                call.respond(HttpStatusCode.OK)
+            } catch (e: NotFoundException) {
+                call.respond(HttpStatusCode.NotAcceptable, ErrorCode(ErrorCode.Code.DONT_EXISTS))
+            }
         }
     }
 
@@ -126,4 +131,7 @@ fun Route.PlantApi(di: DI) {
     }
 //    }
 
+    get<Paths.getPlantTypes> {
+        call.respond(HttpStatusCode.OK, plantRepository.getPlantTypes(true))
+    }
 }

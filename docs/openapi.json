@@ -500,7 +500,10 @@
             "description": "operation failed, the body received isn't correct."
           },
           "404": {
-            "description": "operation failed, either the greenhouse or the plant doesn't exists"
+            "description": "operation failed, either the greenhouse or the plant doesn't exist"
+          },
+          "406": {
+            "description": "operation failed, the plant type provided doesn't exist."
           }
         }
       },
@@ -544,6 +547,30 @@
           },
           "404": {
             "description": "operation failed, either the greenhouse or the plant doesn't exists"
+          }
+        }
+      }
+    },
+    "/plant/types": {
+      "get": {
+        "tags": [
+          "plant"
+        ],
+        "summary": "Get the plant types available",
+        "operationId": "getPlantTypes",
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlantType"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -656,7 +683,8 @@
         "type": "object",
         "properties": {
           "type": {
-            "$ref": "#/components/schemas/PlantType"
+            "type": "integer",
+            "description": "Identifier of the plant type"
           },
           "override_moisture_goal": {
             "type": "number",

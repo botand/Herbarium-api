@@ -3,6 +3,7 @@ package dev.xavierc.herbarium.api.repositories
 import dev.xavierc.herbarium.api.models.*
 import dev.xavierc.herbarium.api.utils.exceptions.NotFoundException
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import java.security.InvalidParameterException
@@ -35,6 +36,25 @@ object PlantTypes : Table("plant_types") {
 }
 
 class PlantRepository(private val dataRepository: DataRepository) {
+    /**
+     * Check if the plant type ID is referenced in the database
+     * @param id Id to validate
+     * @return true if the plant type exists
+     */
+    fun plantTypeExists(id: Int): Boolean {
+        var count = 0
+
+        transaction {
+            count = PlantTypes
+                .slice(PlantTypes.id)
+                .select {
+                    PlantTypes.id eq id
+                }.count()
+        }
+
+        return count == 1
+    }
+
     /**
      * Check if the plant UUID is referenced in the database
      * @param uuid UUID to validate
@@ -155,17 +175,22 @@ class PlantRepository(private val dataRepository: DataRepository) {
      * @param typeId new plant type of the plant
      * @param overrideMoistureGoal new value for the custom moisture goal
      * @param overrideLightExposureMinDuration new value for the custom minimum duration exposure
-     * @throws NotFoundException if the plant doesn't exist
+     * @throws NotFoundException if the plant doesn't exist or if the plant type id doesn't exist.
      */
-    fun updatePlant(uuid: UUID, typeId: Int, overrideMoistureGoal: Double?, overrideLightExposureMinDuration: Double?) {
+    fun updatePlant(uuid: UUID, typeId: Int?, overrideMoistureGoal: Double?, overrideLightExposureMinDuration: Double?) {
         // Check if the plant exists
         if (!exists(uuid)) {
             throw NotFoundException(ErrorCode.Code.NOT_FOUND.toString())
         }
 
         transaction {
+            if(typeId != null && !plantTypeExists(typeId)) {
+                throw NotFoundException(ErrorCode.Code.DONT_EXISTS.toString())
+            }
             Plants.update(where = { Plants.uuid eq uuid }) {
-                it[Plants.type] = typeId
+                if(typeId != null) {
+                    it[Plants.type] = typeId
+                }
                 it[Plants.overrideMoistureGoal] = overrideMoistureGoal
                 it[Plants.overrideLightExposureMinDuration] = overrideLightExposureMinDuration
             }
@@ -245,6 +270,29 @@ class PlantRepository(private val dataRepository: DataRepository) {
         }
 
         return plants
+    }
+
+    /**
+     * Retrieve all the plant types available.
+     * @param excludeDefault should return or not the default plant type
+     * @return list of all the PlantType
+     */
+    fun getPlantTypes(excludeDefault: Boolean = false): List<PlantType> {
+        val types = mutableListOf<PlantType>()
+
+        transaction {
+            var query = PlantTypes.selectAll()
+
+            if(excludeDefault) {
+                query = query.adjustWhere { PlantTypes.id neq 1 }
+            }
+
+            query.forEach {
+                types.add(mapToPlantTypes(it))
+            }
+        }
+
+        return types;
     }
 }
 
