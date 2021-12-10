@@ -100,6 +100,9 @@ object Paths {
     @Location("/api/greenhouse/{uuid}/plant")
     class putPlant(val uuid: java.util.UUID)
 
+    @Location("/api/plant/types")
+    object getPlantTypes
+
     /**
      * Always returns a 200.
      */
