@@ -41,7 +41,7 @@ class PlantRepository(private val dataRepository: DataRepository) {
      * @param id Id to validate
      * @return true if the plant type exists
      */
-    fun plantTypeExists(id: Int): Boolean {
+    private fun plantTypeExists(id: Int): Boolean {
         var count = 0
 
         transaction {
@@ -183,10 +183,11 @@ class PlantRepository(private val dataRepository: DataRepository) {
             throw NotFoundException(ErrorCode.Code.NOT_FOUND.toString())
         }
 
+        if(typeId != null && !plantTypeExists(typeId)) {
+            throw NotFoundException(ErrorCode.Code.DONT_EXISTS.toString())
+        }
+
         transaction {
-            if(typeId != null && !plantTypeExists(typeId)) {
-                throw NotFoundException(ErrorCode.Code.DONT_EXISTS.toString())
-            }
             Plants.update(where = { Plants.uuid eq uuid }) {
                 if(typeId != null) {
                     it[Plants.type] = typeId
