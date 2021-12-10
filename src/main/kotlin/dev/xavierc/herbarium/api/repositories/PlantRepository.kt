@@ -41,7 +41,7 @@ class PlantRepository(private val dataRepository: DataRepository) {
      * @param id Id to validate
      * @return true if the plant type exists
      */
-    fun plantTypeExists(id: Int): Boolean {
+    private fun plantTypeExists(id: Int): Boolean {
         var count = 0
 
         transaction {
@@ -181,6 +181,10 @@ class PlantRepository(private val dataRepository: DataRepository) {
         // Check if the plant exists
         if (!exists(uuid)) {
             throw NotFoundException(ErrorCode.Code.NOT_FOUND.toString())
+        }
+
+        if(typeId != null && !plantTypeExists(typeId)) {
+            throw NotFoundException(ErrorCode.Code.DONT_EXISTS.toString())
         }
 
         transaction {
