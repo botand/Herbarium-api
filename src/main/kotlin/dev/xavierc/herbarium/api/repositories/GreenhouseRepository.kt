@@ -95,7 +95,7 @@ class GreenhouseRepository(private val dataRepository: DataRepository, private v
      * @param userUuid of the greenhouse
      * @return list of the greenhouses linked to the user
      */
-    fun getGreenhousesByUserUid(userUuid: String): List<Greenhouse> {
+    fun getGreenhousesByUserUid(userUuid: String, showRemovedPlant: Boolean = false): List<Greenhouse> {
         var greenhouses = listOf<Greenhouse>()
 
         transaction {
@@ -112,7 +112,8 @@ class GreenhouseRepository(private val dataRepository: DataRepository, private v
                     val lastDataTimestamp =
                         dataRepository.getLastSensorData(greenhouseUuid = it[Greenhouses.uuid])?.timestamp
 
-                    val plants: List<Plant> = plantRepository.getPlantsByGreenhouse(it[Greenhouses.uuid])
+                    val plants: List<Plant> =
+                        plantRepository.getPlantsByGreenhouse(it[Greenhouses.uuid], showRemovedPlant)
 
                     return@map mapToGreenhouse(it, tankLevel, lastDataTimestamp, plants)
                 }
@@ -127,8 +128,8 @@ class GreenhouseRepository(private val dataRepository: DataRepository, private v
      * @param name name for the greenhouse
      * @return UUID of the new greenhouse
      */
-    fun addGreenhouse(userUuid: String, name: String) : UUID {
-        lateinit var uuid : UUID;
+    fun addGreenhouse(userUuid: String, name: String): UUID {
+        lateinit var uuid: UUID;
 
         transaction {
             uuid = Greenhouses.insert {
