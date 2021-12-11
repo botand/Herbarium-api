@@ -726,10 +726,12 @@
             "type": "number"
           },
           "valve_status": {
-            "$ref": "#/components/schemas/ActuatorState"
+            "type": "boolean",
+            "description": "Last known status of the valve"
           },
           "light_strip_status": {
-            "$ref": "#/components/schemas/ActuatorState"
+            "type": "boolean",
+            "description": "Last known status of the light strip"
           },
           "override_moisture_goal": {
             "type": "number",

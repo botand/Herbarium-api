@@ -55,7 +55,7 @@ class DataRepository {
         var sensorData: SensorData? = null
 
         transaction {
-            var query = SensorsData.selectAll().orderBy(SensorsData.timestamp to SortOrder.ASC)
+            var query = SensorsData.selectAll().orderBy(SensorsData.timestamp to SortOrder.DESC)
             if (greenhouseUuid != null) {
                 query = query.adjustWhere { SensorsData.greenhouseUuid eq greenhouseUuid }
             }
@@ -93,7 +93,7 @@ class DataRepository {
         val sensorDatas = mutableListOf<SensorData>()
 
         transaction {
-            var query = SensorsData.selectAll().orderBy(SensorsData.timestamp to SortOrder.ASC)
+            var query = SensorsData.selectAll().orderBy(SensorsData.timestamp to SortOrder.DESC)
             if (greenhousesUuid != null) {
                 query = query.adjustWhere { SensorsData.greenhouseUuid.inList(greenhousesUuid) }
             } else if (plantsUuid != null) {
