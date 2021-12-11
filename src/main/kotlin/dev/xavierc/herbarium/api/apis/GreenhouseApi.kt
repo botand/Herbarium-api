@@ -70,7 +70,7 @@ fun Route.GreenhouseApi(di: DI) {
         get<Paths.getGreenhousesOfUser> {
             val userUuid = call.authentication.principal<FirebasePrincipal>()!!.userUuid!!
 
-            val greenhouses = greenhouseRepository.getGreenhousesByUserUid(userUuid)
+            val greenhouses = greenhouseRepository.getGreenhousesByUserUid(userUuid, true)
 
             call.respond(HttpStatusCode.OK, greenhouses)
         }
