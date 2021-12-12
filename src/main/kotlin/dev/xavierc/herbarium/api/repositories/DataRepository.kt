@@ -5,6 +5,7 @@ import dev.xavierc.herbarium.api.models.SensorData
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.notInList
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import java.util.*
@@ -106,6 +107,9 @@ class DataRepository {
 
             sensorDatas.addAll(query.map { mapToSensorData(it) })
         }
+        if (plantsUuid != null) {
+            sensorDatas.distinctBy { it.plantUuid }
+        }
 
         return sensorDatas
     }
@@ -125,7 +129,7 @@ class DataRepository {
         val actuatorsState = mutableListOf<ActuatorState>()
 
         transaction {
-            var query = ActuatorsState.selectAll().orderBy(ActuatorsState.timestamp to SortOrder.ASC)
+            var query = ActuatorsState.selectAll().withDistinct().orderBy(ActuatorsState.timestamp to SortOrder.DESC)
             if (greenhousesUuid != null) {
                 query = query.adjustWhere { ActuatorsState.greenhouseUuid.inList(greenhousesUuid) }
             } else if (plantsUuid != null) {
@@ -137,6 +141,9 @@ class DataRepository {
             }
 
             actuatorsState.addAll(query.map { mapToActuatorState(it) })
+        }
+        if (plantsUuid != null) {
+            actuatorsState.distinctBy { it.plantUuid }
         }
 
         return actuatorsState
