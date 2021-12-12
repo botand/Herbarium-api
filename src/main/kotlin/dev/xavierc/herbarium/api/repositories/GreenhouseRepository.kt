@@ -137,7 +137,7 @@ class GreenhouseRepository(private val dataRepository: DataRepository, private v
             }
 
             uuid = Greenhouses.insert {
-                it[Greenhouses.uuid] = uuid
+                it[Greenhouses.uuid] = greenhouseUuid
                 it[Greenhouses.name] = name
                 it[Greenhouses.userUuid] = userUuid
             } get Greenhouses.uuid
