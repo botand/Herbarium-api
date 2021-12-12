@@ -331,7 +331,7 @@ class PlantRepository(private val dataRepository: DataRepository) {
             }
 
             if (movedPlant != null) {
-                Plants.deleteIgnoreWhere { Plants.uuid eq movedPlant[Plants.uuid] }
+                Plants.deleteWhere { Plants.uuid eq movedPlant[Plants.uuid] }
             }
         }
     }
