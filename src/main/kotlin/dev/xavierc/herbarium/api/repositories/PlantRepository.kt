@@ -6,6 +6,7 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
+import java.lang.IllegalArgumentException
 import java.security.InvalidParameterException
 import java.util.*
 
@@ -177,22 +178,27 @@ class PlantRepository(private val dataRepository: DataRepository) {
      * @param overrideLightExposureMinDuration new value for the custom minimum duration exposure
      * @throws NotFoundException if the plant doesn't exist or if the plant type id doesn't exist.
      */
-    fun updatePlant(uuid: UUID, typeId: Int?, overrideMoistureGoal: Double?, overrideLightExposureMinDuration: Double?) {
+    fun updatePlant(
+        uuid: UUID,
+        typeId: Int?,
+        overrideMoistureGoal: Double?,
+        overrideLightExposureMinDuration: Double?
+    ) {
         // Check if the plant exists
         if (!exists(uuid)) {
             throw NotFoundException(ErrorCode.Code.NOT_FOUND.toString())
         }
 
-        if(typeId != null && !plantTypeExists(typeId)) {
+        if (typeId != null && !plantTypeExists(typeId)) {
             throw NotFoundException(ErrorCode.Code.DONT_EXISTS.toString())
         }
 
         transaction {
-            if(typeId != null && !plantTypeExists(typeId)) {
+            if (typeId != null && !plantTypeExists(typeId)) {
                 throw NotFoundException(ErrorCode.Code.DONT_EXISTS.toString())
             }
             Plants.update(where = { Plants.uuid eq uuid }) {
-                if(typeId != null) {
+                if (typeId != null) {
                     it[Plants.type] = typeId
                 }
                 it[Plants.overrideMoistureGoal] = overrideMoistureGoal
@@ -287,7 +293,7 @@ class PlantRepository(private val dataRepository: DataRepository) {
         transaction {
             var query = PlantTypes.selectAll()
 
-            if(excludeDefault) {
+            if (excludeDefault) {
                 query = query.adjustWhere { PlantTypes.id neq 1 }
             }
 
@@ -297,6 +303,37 @@ class PlantRepository(private val dataRepository: DataRepository) {
         }
 
         return types;
+    }
+
+    /**
+     * Move a plant from one place to another
+     * If there is already
+     */
+    fun movePlant(plantUuid: UUID, movedPosition: Int) {
+        if (!exists(plantUuid)) {
+            throw NotFoundException(ErrorCode.Code.NOT_FOUND.toString())
+        }
+
+        transaction {
+            val movedPlant =
+                Plants.slice(Plants.uuid, Plants.type, Plants.removed).select { Plants.position eq movedPosition }
+                    .singleOrNull();
+
+            if (movedPlant != null && movedPlant[Plants.type] != 1 && !movedPlant[Plants.removed]) {
+                throw IllegalArgumentException(ErrorCode.Code.PLANT_POSITION_ALREADY_OCCUPIED.toString())
+            }
+
+            // Plant update the current position
+            Plants.update(where = { Plants.uuid eq plantUuid }) {
+                it[Plants.position] = movedPosition
+                it[Plants.removed] = false
+                it[Plants.removedAt] = null
+            }
+
+            if (movedPlant != null) {
+                Plants.deleteIgnoreWhere { Plants.uuid eq movedPlant[Plants.uuid] }
+            }
+        }
     }
 }
 

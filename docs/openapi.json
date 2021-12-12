@@ -693,6 +693,10 @@
           "override_light_exposure_min_duration": {
             "type": "integer",
             "description": "Override of the light exposure by the user"
+          },
+          "moved_position": {
+            "type": "integer",
+            "description": "New position of the plant"
           }
         },
         "required": [
