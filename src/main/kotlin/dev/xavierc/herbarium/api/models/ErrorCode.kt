@@ -21,7 +21,6 @@ data class ErrorCode(
 ) 
 {
     /**
-    * 
     * Values: PLANT_POSITION_INVALID, PLANT_POSITION_ALREADY_OCCUPIED, PLANT_ALREADY_REMOVED
     */
     enum class Code(val value: kotlin.String){
@@ -30,7 +29,8 @@ data class ErrorCode(
         PLANT_ALREADY_REMOVED("PLANT_ALREADY_REMOVED"),
         USER_ALREADY_EXISTS("USER_ALREADY_EXISTS"),
         NOT_FOUND("NOT_FOUND"),
-        DONT_EXISTS("DONT_EXISTS")
+        DONT_EXISTS("DONT_EXISTS"),
+        GREENHOUSE_ALREADY_EXISTS("GREENHOUSE_ALREADY_EXISTS")
     }
 }
 

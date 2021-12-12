@@ -12,14 +12,18 @@
 package dev.xavierc.herbarium.api.models
 
 import com.google.gson.annotations.SerializedName
+import java.util.*
 
 
 /**
  *
- * @param greenhouseName 
+ * @param name
+ * @param uuid
  */
 data class PutGreenhouseRequest(
-    @SerializedName(value = "greenhouse_name")
-    val greenhouseName: String
+    @SerializedName(value = "name")
+    val name: String,
+    @SerializedName(value = "uuid")
+    val uuid: UUID
 ) 
 

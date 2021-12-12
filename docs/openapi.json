@@ -88,13 +88,18 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "greenhouse_name": {
+                  "name": {
                     "type": "string",
                     "example": "Greenhouse A"
+                  },
+                  "uuid": {
+                    "type": "string",
+                    "format": "uuid"
                   }
                 },
                 "required": [
-                  "greenhouse_name"
+                  "name",
+                  "uuid"
                 ]
               }
             }
