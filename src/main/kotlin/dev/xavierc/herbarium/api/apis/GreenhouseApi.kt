@@ -147,7 +147,8 @@ fun Route.GreenhouseApi(di: DI) {
             val userUuid = call.authentication.principal<FirebasePrincipal>()!!.userUuid!!
             val putGreenhouseRequest: PutGreenhouseRequest = call.receive()
 
-            val uuid = greenhouseRepository.addGreenhouse(userUuid, putGreenhouseRequest.greenhouseName)
+            val uuid =
+                greenhouseRepository.addGreenhouse(userUuid, putGreenhouseRequest.uuid, putGreenhouseRequest.name)
             call.respond(HttpStatusCode.Created, UuidResponse(uuid))
         }
     }

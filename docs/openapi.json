@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Herbarium API",
-    "version": "1.2.0"
+    "version": "1.4.0"
   },
   "servers": [
     {
@@ -88,13 +88,18 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "greenhouse_name": {
+                  "name": {
                     "type": "string",
                     "example": "Greenhouse A"
+                  },
+                  "uuid": {
+                    "type": "string",
+                    "format": "uuid"
                   }
                 },
                 "required": [
-                  "greenhouse_name"
+                  "name",
+                  "uuid"
                 ]
               }
             }

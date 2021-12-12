@@ -14,7 +14,7 @@ import java.util.*
  * Representation of a greenhouse
  */
 object Greenhouses : Table("greenhouses") {
-    val uuid: Column<UUID> = uuid("uuid").autoGenerate().primaryKey()
+    val uuid: Column<UUID> = uuid("uuid").primaryKey()
     val name: Column<String> = varchar("name", 256)
     val userUuid: Column<String> = varchar("user_uuid", 128).references(Users.uuid, onDelete = ReferenceOption.CASCADE)
     val createdAt: Column<DateTime> = datetime("created_at")
@@ -128,11 +128,16 @@ class GreenhouseRepository(private val dataRepository: DataRepository, private v
      * @param name name for the greenhouse
      * @return UUID of the new greenhouse
      */
-    fun addGreenhouse(userUuid: String, name: String): UUID {
+    fun addGreenhouse(userUuid: String, greenhouseUuid: UUID, name: String): UUID {
         lateinit var uuid: UUID;
 
         transaction {
+            if(exist(greenhouseUuid)) {
+                throw IllegalArgumentException(ErrorCode.Code.GREENHOUSE_ALREADY_EXISTS.toString())
+            }
+
             uuid = Greenhouses.insert {
+                it[Greenhouses.uuid] = uuid
                 it[Greenhouses.name] = name
                 it[Greenhouses.userUuid] = userUuid
             } get Greenhouses.uuid
