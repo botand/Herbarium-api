@@ -5,7 +5,6 @@ import dev.xavierc.herbarium.api.models.SensorData
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.notInList
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import java.util.*
@@ -105,12 +104,12 @@ class DataRepository {
                 query = query.andWhere { SensorsData.type eq type.value }
             }
 
-            sensorDatas.addAll(query.map { mapToSensorData(it) })
+            if(plantsUuid != null) {
+                sensorDatas.addAll(query.distinctBy { it[SensorsData.plantUuid] }.map { mapToSensorData(it) })
+            } else {
+                sensorDatas.addAll(query.map { mapToSensorData(it) })
+            }
         }
-        if (plantsUuid != null) {
-            sensorDatas.distinctBy { it.plantUuid }
-        }
-
         return sensorDatas
     }
 
@@ -140,12 +139,12 @@ class DataRepository {
                 query = query.andWhere { ActuatorsState.type eq type.value }
             }
 
-            actuatorsState.addAll(query.map { mapToActuatorState(it) })
+            if(plantsUuid != null) {
+                actuatorsState.addAll(query.distinctBy { it[ActuatorsState.plantUuid] }.map { mapToActuatorState(it) })
+            } else {
+                actuatorsState.addAll(query.map { mapToActuatorState(it) })
+            }
         }
-        if (plantsUuid != null) {
-            actuatorsState.distinctBy { it.plantUuid }
-        }
-
         return actuatorsState
     }
 

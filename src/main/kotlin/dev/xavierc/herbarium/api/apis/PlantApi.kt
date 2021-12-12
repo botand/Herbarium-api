@@ -85,6 +85,19 @@ fun Route.PlantApi(di: DI) {
 
             val plantUpdateRequest: PlantUpdateRequest = call.receive()
             try {
+                if(plantUpdateRequest.movedPosition != null) {
+                    try {
+                        plantRepository.movePlant(request.plantUuid, plantUpdateRequest.movedPosition)
+                    } catch (e: IllegalArgumentException) {
+                        call.respond(HttpStatusCode.NotAcceptable)
+                        return@post
+                    } catch (e: NotFoundException) {
+                        call.respond(HttpStatusCode.NotFound)
+                        return@post
+                    }
+                    call.respond(HttpStatusCode.OK)
+                    return@post
+                }
                 plantRepository.updatePlant(
                     request.plantUuid,
                     plantUpdateRequest.typeId,
