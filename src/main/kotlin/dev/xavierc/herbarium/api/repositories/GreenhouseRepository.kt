@@ -17,7 +17,7 @@ object Greenhouses : Table("greenhouses") {
     val uuid: Column<UUID> = uuid("uuid").primaryKey()
     val name: Column<String> = varchar("name", 256)
     val userUuid: Column<String> = varchar("user_uuid", 128).references(Users.uuid, onDelete = ReferenceOption.CASCADE)
-    val createdAt: Column<DateTime> = datetime("created_at")
+    val createdAt: Column<DateTime> = datetime("created_at").default(DateTime.now())
 }
 
 class GreenhouseRepository(private val dataRepository: DataRepository, private val plantRepository: PlantRepository) {
